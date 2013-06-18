@@ -1,0 +1,92 @@
+﻿@using StackExchange.Profiling
+<!DOCTYPE html>
+<html>
+<head>
+    @this.InitClientTimings()
+    <meta charset="utf-8" />
+    <title>@(Page.Title ?? "CryptAByte: Secure, anonymous messaging and file sharing - Beta")
+    </title>
+    <link href="@Url.Content("~/Content/Site.css")" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="@Url.Content("~/Content/themes/cupertino/jquery-ui-1.8.20.custom.css")" />
+    <script src="@Url.Content("~/Scripts/jquery-1.7.2.min.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Scripts/jquery-ui-1.8.20.custom.min.js")" type="text/javascript"></script>
+    <script type="text/javascript" src="../../Scripts/KeyManager.js"></script>
+    
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Crypt-A-Byte" />
+</head>
+<body>
+    <div class="page">
+        <header>
+            <div id="title">
+                <img src="../../Content/images/logo.png" alt="CryptAByte" />
+                <h1 style="display: none;">Crypt-A-Byte
+                </h1>
+            </div>
+            @* <div id="logindisplay">
+                @Html.Partial("_LogOnPartial")
+            </div>*@
+            <nav>
+                <ul id="menu">
+                    <li>@Html.ActionLink("Home", "Index", "Home")</li>
+                    <li>@Html.ActionLink("RESTfull API Spec", "Index", "Service")</li>
+                    <li>@Html.ActionLink("Self-Destructing Email", "Index", "SelfDestruct")</li>
+                    <li>@Html.ActionLink("Apps", "Apps", "Home")</li>
+                    <li>@Html.ActionLink("About", "About", "Home")</li>
+                    <li>@Html.ActionLink("Feedback", "Contact", "Home")</li>
+                    <li><a href="http://blog.cryptabyte.com/" title="Crypto-Autonomist">Blog</a></li>
+                </ul>
+            </nav>
+        </header>
+        <section id="main">
+            <div id="ErrorDialog" class="grey-box" style="display: none;"></div>
+            @RenderBody()
+        </section>
+        <footer style="horiz-align: center;">
+
+
+            <div id="fb-root"></div>
+            <script>(function (d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) return;
+    js = d.createElement(s); js.id = id;
+    js.src = "//connect.facebook.net/en_GB/all.js#xfbml=1&appId=236310899725234";
+    fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+            <div class="fb-like" data-href="https://www.facebook.com/CryptAByte" data-send="true"
+                data-width="450" data-show-faces="true"></div>
+
+
+
+
+
+
+
+
+
+
+
+
+            <div><a href="https://www.facebook.com/CryptAByte">Facebook Page</a></div>
+
+
+            <div>
+                <script type="text/javascript" language="JavaScript" src="https://objectivismonline.us1.list-manage.com/subscriber-count?b=16&u=2b63d54a-b080-4794-9239-f61e989c102c&id=e5da2e5ce7"></script>
+            </div>
+
+        </footer>
+    </div>
+    @MiniProfiler.RenderIncludes()
+
+
+    <script type="text/javascript" src="../../Scripts/jquery.unobtrusive-ajax.min.js"></script>
+    <script type="text/javascript" src="../../Scripts/jquery.validate.min.js"></script>
+    <script type="text/javascript" src="../../Scripts/jquery.validate.unobtrusive.min.js"></script>
+
+    <script type="text/javascript" src="../../Scripts/jquery.form.js"></script>
+
+
+
+</body>
+</html>

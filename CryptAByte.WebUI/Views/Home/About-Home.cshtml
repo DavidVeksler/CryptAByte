@@ -1,0 +1,114 @@
+﻿@{
+    Layout = null;
+}
+<div class="ui-accordion">
+    <h3>
+        <a href="#">About CryptAByte</a></h3>
+    <div>
+        <p>
+            <strong>CryptAByte.com is a free online drop box that enables secure (encrypted) message
+                and file sharing over the web using a public-key infrastructure. </strong>
+        </p>
+        <p>
+            Messages and files are encrypted using a public key and can only be decrypted using
+            the passphrase entered when your key is created. <strong>Your data is never stored in
+                                                                 plaintext, and is impossible to decrypt without your passphrase.</strong>
+        </p>
+        <p>Windows/Mac desktop <a href="/Home/Apps">apps</a> are coming soon!  Subscribe below to get updates.
+        </p>
+    </div>
+    
+   
+
+    <h3>
+        <a href="#">Why Use CryptAByte?</a></h3>
+    <div>
+        <p>
+            Crypt-A-Byte uses public-key encryption just like HTTPS/SSL and OpenPGP/PGP. We
+            encourage you to use <a href="http://dotmac.rationalmind.net/2012/06/notes-talk-information-security-fundamentals/">
+                                     these tools</a> whenever possible.
+        </p>
+        <p>
+            However, PGP requires that you and your recipient install and configure encryption
+            software and create and exchange key pairs. When this is not practical, we make
+            it very simple (and free) to share data using the same algorithms over the web.
+        </p>
+        <p>
+            We use RSA for key pairs, encrypt messages and files using AES 256, and SHA256 for
+            hashing.
+        </p>
+    </div>
+    
+      <h3>
+        <a href="#">Subscribe</a></h3>
+    <div>
+        <p>Subscribe below and/or "like" the <a href="https://www.facebook.com/CryptAByte">Facebook page</a> to receive updates on new features.</p>
+        @Html.Partial("Subscribe")
+    </div>
+
+    <h3>
+        <a href="#">Disclaimer</a></h3>
+    <div>
+        <p>
+            Keys (and messages) may be deleted 30 days after the lock date. The default lock
+            date (customize in the advanced option of the create key dialog) is 30 days from
+            the key creation date.
+        </p>
+        <p>
+            This service is completely anonymous and keeps no user-specific records. It is impossible
+            to decrypt your data without the passphrase you provide when a key is created. Furthermore,
+            we do not record IP addresses or any other user-specific information. However, we
+            do have access to your key at the moment you enter it, and may be forced to record
+            your passphrase under a court order.
+            <br />
+            To eliminate this risk, we encourage you to use our @Html.ActionLink("API", "Index", "Service")
+            or the open-source offline app for Windows/Mac (coming soon) to access your data.
+        </p>
+    </div>
+
+   
+
+    <h3>
+        <a href="#">Usage Scenarios</a></h3>
+    <div>
+        <p>
+            <strong>Basic Scenarios:</strong>
+        </p>
+        <ul>
+            <li>Secure messaging</li>
+            <li>Secure file sharing</li>
+            <li>Secure chat client</li>
+            <li>Offline message support</li>
+            <li>Secure email client</li>
+        </ul>
+        <p>
+            <strong>Advanced Scenarios:</strong>
+            <br />
+            <em>When using the "release date" option (available via UI and API) messages can be
+                delivered, but cannot be retrieved before a certain time.</em>
+        </p>
+        <ul>
+            <li>Placing bets: each participant enters their guess at the public URL, but the answer
+                cannot be seen until the release date.</li>
+            <li>More to come...</li>
+        </ul>
+    </div>
+    <h3>
+        <a href="#">Terms &amp; Conditions</a></h3>
+    <div>
+        <p>
+            Remember that as long as your keep your passphrase secret, it is impossible
+            for anyone else to know what you use this
+            service for. However if you publicly disclose your passphrase and anyone complains,
+            we'll just delete your key (and thus any messages/files sent to it).
+        </p>
+        <p>
+            <strong>Intellectual Property Complaints: </strong>If you object to any information
+            being stored
+            on this site, please send us the Key Id <em>and passphrase </em>via the contact
+            page.
+        </p>
+    </div>
+
+
+</div>

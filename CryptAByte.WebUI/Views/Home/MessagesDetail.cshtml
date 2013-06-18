@@ -1,0 +1,34 @@
+﻿@using CryptAByte.Domain.KeyManager
+@using CryptAByte.WebUI.Controllers
+@model List<CryptAByte.Domain.KeyManager.Message>
+@{Layout = null;}
+@if (@Model.Count == 0)
+{
+    <strong>No messages sent to this key.</strong>    
+}
+else
+{
+    <ul>
+        @foreach (Message message in @Model)
+        {
+            if (message.IsFile)
+            {
+            <li><strong>Sent @message.Created</strong>
+                <pre class="red-box">Download <a href="#" onclick="javascript:GetFile('@message.TemporaryDownloadId');">@message.MessageData</a></pre>
+            </li>    
+            }
+            else
+            {
+            <li><strong>Sent @message.Created</strong>
+                <pre class="red-box">@message.MessageData</pre>
+            </li>    
+            }
+        }
+    </ul>
+}
+@if (Model.Any(m => m.IsFile))
+{
+    <p class="red-box">
+        <em>Note: The link(s) above are valid for @HomeController.PasswordExpiresInSeconds seconds, after which the temporary download key will expire. </em>
+    </p>
+}

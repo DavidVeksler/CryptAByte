@@ -1,0 +1,28 @@
+﻿@model dynamic
+<script type="text/javascript" src="../../Scripts/KeyManager.js"></script>
+<div id="main">
+    <div id="RequestKey">
+        <h4>Create Request</h4>
+        <input type="text" class="ui-widget" name="releaseDate" id="releaseDate" value=" " />
+        <button id="btnCreateRequest">Create Request</button>
+        <br />
+        <label>Response</label>
+        <textarea id="response" style="width: 800px;" cols="100" rows="10"></textarea>
+        <br />
+        <label>Token</label>
+        <input type="text" name="name" value=" " id="token" style="width: 500px;" />
+    </div>
+    <div id="Message" class="ui-menu">
+        <h4>Attach Message</h4>
+        <textarea id="MessageText" cols="100"></textarea>
+        <br />
+        <button id="btnAttachMessage" class="ui-button ui-widget">
+            Attach Message</button>
+    </div>
+    <div id="GetMessagesDiv">
+        <h4>Get Messages</h4>
+        <br />
+        <button id="btnGetMessages" class="ui-button ui-widget">Get
+            Messages</button>
+    </div>
+</div>

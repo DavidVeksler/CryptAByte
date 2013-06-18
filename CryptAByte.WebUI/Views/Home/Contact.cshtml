@@ -1,0 +1,35 @@
+﻿@model CryptAByte.WebUI.Models.ContactFormModel 
+@{
+    ViewBag.Title = "Contact Us";
+}
+
+<h2>Contact Us/Submit Feedback</h2>
+
+@using (Ajax.BeginForm("SubmitContact", "Home", new AjaxOptions() { OnSuccess = "ShowMessageSent", OnFailure = "OnError" }))
+{
+
+    <div>
+
+        <div>
+            @Html.LabelFor(m => m.Name)
+            @Html.EditorFor(m => m.Name)
+            @Html.ValidationMessageFor(m => m.Name)
+        </div>
+        <div>
+            @Html.LabelFor(m => m.Email)
+            @Html.EditorFor(m => m.Email)
+            @Html.ValidationMessageFor(m => m.Email)
+        </div>
+        <div>
+            @Html.LabelFor(m => m.Message)
+            <br />
+            @Html.TextAreaFor(m => m.Message, new { rows = 10, cols = 100 })
+            @Html.ValidationMessageFor(m => m.Message)
+        </div>
+
+        <button class="ui-button">Send</button>
+
+
+    </div>
+
+}

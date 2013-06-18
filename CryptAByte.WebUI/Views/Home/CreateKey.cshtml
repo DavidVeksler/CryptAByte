@@ -1,0 +1,88 @@
+﻿@{ Layout = null;}
+@model CryptAByte.WebUI.Models.NewKeyModel
+@using (Ajax.BeginForm("CreateKey", "Home", new AjaxOptions() { OnSuccess = "ShowKeyDetailWindow", UpdateTargetId = "KeyDetails", OnFailure = "OnError" }))
+{
+
+    <div id="KeyDetails"></div>
+    
+    <div id="CreateKey" class="grey-box">
+        <h2>1: Get a Key Id</h2>
+
+        <ul style="width: 400px">
+            <li>A "Key Id" is a unique URL which points to a mailbox that accepts encrypted messages.
+            </li>
+            <li>Only those who know the passphrase will be able to retrieve the message sent to
+                the Key Id.</li>
+            <li>We recommend you leave the passphrase field blank to generate a strong, random passphrase.
+            </li>
+        </ul>
+
+
+        <div>@Html.LabelFor(m => m.Passphrase)
+            @Html.EditorFor(m => m.Passphrase)
+            @Html.ValidationMessageFor(m => m.Passphrase)
+        </div>
+        <div id="AdvancedOptions" style="display: none; margin: 10px;">
+            <fieldset>
+                <legend>Advanced Options</legend>
+                <div>
+                    @Html.CheckBoxFor(m => m.DeleteMessagesAfterReading)
+                    @Html.LabelFor(m => m.DeleteMessagesAfterReading)
+                </div>
+                <div>
+                    @Html.CheckBoxFor(m => m.DeleteKeyAfterReading)
+                    @Html.LabelFor(m => m.DeleteKeyAfterReading)
+                </div>
+                <div>
+                    @Html.LabelFor(m => m.NotifyEmail)
+                    <br />
+                    @Html.EditorFor(m => m.NotifyEmail)
+                    @Html.ValidationMessageFor(m => m.NotifyEmail)
+                </div>
+                <div>
+                    @Html.LabelFor(m => m.ReleaseDate)
+                    <br />
+                    @Html.EditorFor(m => m.ReleaseDate, new { @class = "ui-datepicker" })
+                </div>
+                <div>
+                    @Html.LabelFor(m => m.LockDate)
+                    <br />
+                    @Html.EditorFor(m => m.LockDate)
+                </div>
+            </fieldset>
+        </div>
+
+        <div>
+            <button id="btnMore" title="Advanced Options" class="ui-button" onclick="ShowMoreOptions();return false;">
+                <span>(more)</span>
+            </button>
+            <button class="ui-button">Create a Key Id</button>
+        </div>
+
+        @*<div class="tabs">
+            <ul>
+                <li><a href="#online-key">Create Key Pair</a></li>
+                <li><a href="#offline-key" title="(Advanced)">Import Public Key</a></li>
+            </ul>
+            <div id="online-key">
+                
+            </div>
+            <div id="offline-key" class="red-box">
+                <em>For super-secure offline mode, paste an RSA public key:</em>
+                <br />
+                <div>
+                    @Html.LabelFor(m => m.PublicKey)
+                    @Html.TextBoxFor(m => m.PublicKey)
+                    @Html.ValidationMessageFor(m => m.PublicKey)
+                </div>
+                <div>
+                    @Html.LabelFor(m => m.PrivateKeyHash)
+                    @Html.TextBoxFor(m => m.PrivateKeyHash)
+                    @Html.ValidationMessageFor(m => m.PrivateKeyHash)
+                </div>
+                <button class="ui-button">Import RSA Key</button>
+            </div>
+        </div>*@
+    </div>
+
+}

@@ -1,0 +1,26 @@
+﻿@{
+    Page.Title = "CryptAByte: Secure, anonymous messaging and file sharing";
+}
+
+@*<h2>@ViewBag.Message</h2>*@
+
+    
+    <div id="instructions" class="ui-state-highlight ui-corner-all" style="display: none;">
+            <p>
+                <span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em;"></span>
+                <h4>Send a message or file to the anonymous key below. Your message/file can only be
+                    decrypted by a password for the private key matching the public key used to encrypt
+                    this message.                    
+                </h4>
+        </div>
+    
+
+    <div class="content-left">
+        @Html.Partial("CreateKey")
+        @Html.Partial("SendMessage")
+        @Html.Partial("GetMessages")
+    </div>
+    <div class="content-right">
+        @Html.Partial("About-Home")
+    </div>
+

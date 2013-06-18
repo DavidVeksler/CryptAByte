@@ -1,0 +1,63 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptAByte.WebUI", "CryptAByte.WebUI\CryptAByte.WebUI.csproj", "{3CE89356-8503-4CB6-9CF8-5619B3ADFFC8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptAByte.WebUI.Tests", "CryptAByte.WebUI.Tests\CryptAByte.WebUI.Tests.csproj", "{CFDB7BF0-A526-45C4-98BA-F2A479D06DF1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptAByte.Domain", "CryptAByte.Domain\CryptAByte.Domain.csproj", "{6E6C7193-B33C-4A67-9A6E-683464FC2A3B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptAByte.Domain.Tests", "CryptAByte.Domain.Tests\CryptAByte.Domain.Tests.csproj", "{AE2D0ACA-37CD-4A17-A17A-0248D891529D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptAByte.CryptoLibrary", "CryptAByte.CryptoLibrary\CryptAByte.CryptoLibrary.csproj", "{7548D490-5F64-4353-B35B-1CDE3F4B6AEA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptAByte.WindowsClient", "CryptAByte.WindowsClient\CryptAByte.WindowsClient.csproj", "{22F63326-51E6-4E9F-8790-3367C70BB865}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{08EA0906-2C54-45F3-8626-04A27AFB1BA4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptAByte.WindowsClient.Tests", "CryptAByte.WindowsClient.Tests\CryptAByte.WindowsClient.Tests.csproj", "{656CB710-92C6-48B1-A5D1-05C737FFDBEA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{22F63326-51E6-4E9F-8790-3367C70BB865}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{22F63326-51E6-4E9F-8790-3367C70BB865}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{22F63326-51E6-4E9F-8790-3367C70BB865}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{22F63326-51E6-4E9F-8790-3367C70BB865}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3CE89356-8503-4CB6-9CF8-5619B3ADFFC8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3CE89356-8503-4CB6-9CF8-5619B3ADFFC8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3CE89356-8503-4CB6-9CF8-5619B3ADFFC8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3CE89356-8503-4CB6-9CF8-5619B3ADFFC8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{656CB710-92C6-48B1-A5D1-05C737FFDBEA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{656CB710-92C6-48B1-A5D1-05C737FFDBEA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{656CB710-92C6-48B1-A5D1-05C737FFDBEA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{656CB710-92C6-48B1-A5D1-05C737FFDBEA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6E6C7193-B33C-4A67-9A6E-683464FC2A3B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E6C7193-B33C-4A67-9A6E-683464FC2A3B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E6C7193-B33C-4A67-9A6E-683464FC2A3B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E6C7193-B33C-4A67-9A6E-683464FC2A3B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7548D490-5F64-4353-B35B-1CDE3F4B6AEA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7548D490-5F64-4353-B35B-1CDE3F4B6AEA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7548D490-5F64-4353-B35B-1CDE3F4B6AEA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7548D490-5F64-4353-B35B-1CDE3F4B6AEA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AE2D0ACA-37CD-4A17-A17A-0248D891529D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AE2D0ACA-37CD-4A17-A17A-0248D891529D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AE2D0ACA-37CD-4A17-A17A-0248D891529D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AE2D0ACA-37CD-4A17-A17A-0248D891529D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CFDB7BF0-A526-45C4-98BA-F2A479D06DF1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CFDB7BF0-A526-45C4-98BA-F2A479D06DF1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CFDB7BF0-A526-45C4-98BA-F2A479D06DF1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CFDB7BF0-A526-45C4-98BA-F2A479D06DF1}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{656CB710-92C6-48B1-A5D1-05C737FFDBEA} = {08EA0906-2C54-45F3-8626-04A27AFB1BA4}
+		{AE2D0ACA-37CD-4A17-A17A-0248D891529D} = {08EA0906-2C54-45F3-8626-04A27AFB1BA4}
+		{CFDB7BF0-A526-45C4-98BA-F2A479D06DF1} = {08EA0906-2C54-45F3-8626-04A27AFB1BA4}
+	EndGlobalSection
+EndGlobal

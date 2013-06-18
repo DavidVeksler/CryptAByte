@@ -1,0 +1,80 @@
+﻿@model CryptAByte.WebUI.Models.SelfDestructingMessageModel
+@{
+    Page.Title = "Self-Destructing Messaging: encrypted emails which auto-delete after being read; share secrets anonymously";
+}
+
+<h1>Self-Destructing Messaging</h1>
+@*<h3 class="red-box error">Warning: this service is currently under a testing
+    period.  Please
+    don't use it for
+    anything important.</h3>*@
+
+<h3>Self-destructing messages are messages that erase themselves after the recipient
+    reads them.</h3>
+<div>
+    <strong>Here is how it works:</strong>
+    <ol>
+        <li>Write your message and enter the email address of the recipient.</li>
+        <li>The message is encrypted with a random passphrase and stored on the server.  The
+            passphrase
+                is embedded in the link to open the message.</li>
+        <li>When the recipient clicks on the link, this website decrypts the message and in
+            the same step, erases the message.</li>
+    </ol>
+</div>
+
+
+
+@Html.Partial("Send")
+
+<div class="ui-accordion">
+
+    <h3><a href="#">Notes</a></h3>
+    <div>
+
+        <ul>
+            <li>The passphrase is not stored and the message is never stored in decrypted form,
+                so it is impossible for the administrator
+                to reveal the message after it is sent.</li>
+            <li>If other than the intended recipient opens the email before it is read, they will
+                be able to read the
+                message.  The intended recipient will know that the email was read because the message
+                will no longer be available.</li>
+            <li>The read URL contains a hash of the original message.  This is used to verify that
+                the message has not changed since it was sent -- as might happen if the database
+                used to store the messages was hacked or compromised.</li>
+        </ul>
+
+    </div>
+
+    <h3><a href="#">Cautions &amp; Disclaimers</a></h3>
+    <div>
+
+        <ul>
+            <li>It may be possible for force the operator
+                of the website
+                (either by a lawful court order or by compromising our security) to reveal the
+            message
+                without notifying the original recipient if the sent email is available - for example,
+                if someone has access the inbox of the recipient.</li>
+            <li>If you wish to recieve information securily and anonymously, we suggest you use
+                CryptAByte's messaging service.  If you wish to anonymously share information and
+                understand the risks involved,
+                you can use this service.</li>
+            <li>We may store the sender's IP address and recipient email address to prevent abuse
+                of this service.  The mail server itself may also keep a record of the recipients
+                email address and a temporary copy of the read URL (containing the passphrase) itself
+                while
+                it is being sent.
+                Even after the message is sent, the read URL it may be recoverable by forensic
+            methods.
+            </li>
+        </ul>
+
+    </div>
+
+
+
+</div>
+
+

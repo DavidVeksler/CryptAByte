@@ -1,0 +1,23 @@
+﻿@{ Layout = null;}
+@model CryptAByte.WebUI.Models.GetMessagesModel
+@using (Ajax.BeginForm("GetMessages", "Home", new AjaxOptions() { UpdateTargetId = "messageDetails", OnSuccess = "ShowMyMessages", OnFailure = "OnError" }))
+{
+
+    <div id="messageDetails"></div>
+
+
+    <div id="get-messages" class="red-box">
+        <h2>3: View Messages sent to a Key Id</h2>
+        <div>@Html.LabelFor(m => m.KeyTokenIdentifier)
+            @Html.TextBoxFor(m => m.KeyTokenIdentifier)
+            @Html.ValidationMessageFor(m => m.KeyTokenIdentifier)
+        </div>
+        <div>
+            @Html.LabelFor(m => m.Passphrase)
+            @Html.PasswordFor(m => m.Passphrase)
+            @Html.ValidationMessageFor(m => m.Passphrase)
+        </div>
+        <button class="ui-button">Show Messages</button>
+    </div>
+
+}

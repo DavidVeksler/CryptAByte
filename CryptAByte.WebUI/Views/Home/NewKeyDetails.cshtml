@@ -1,0 +1,32 @@
+﻿@{
+    Layout = null;
+    var URL = "https://" + Request.Url.Host + "#" + @Model.URI;
+}
+@model CryptAByte.Domain.KeyManager.CryptoKey
+<div class="ui-state-highlight ui-corner-all" style="margin-top: 20px; padding: 0 .7em;">
+    <p>
+        <span class="ui-icon ui-icon-info" style="float: left; margin-right: .3em;"></span>
+        <label>Key URI:</label>
+        <label><a target="_new" href="@URL">@URL</a></label>
+        <p>
+            Share this URL to securely attach files and messages to this key.
+        </p>
+</div>
+<div class="ui-state-highlight ui-corner-all" style="margin-top: 20px; padding: 0 .7em;">
+    <p>
+        <div class="ui-widget">
+            <div class="ui-state-error ui-corner-all">
+                <p>
+                    <span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;">Passphrase:
+                    </span>Passphrase: <strong>@ViewBag.Passphrase</strong>
+            </div>
+        </div>
+        <p>
+            Only someone with this passphrase can decrypt the messages and files sent to this
+            address.
+        </p>
+    @*<p>
+        You can use the offline app (coming soon) to encrypt the secret message offline,
+        then upload them to this account.
+    </p>*@
+</div>

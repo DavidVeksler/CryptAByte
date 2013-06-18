@@ -1,0 +1,40 @@
+﻿@model CryptAByte.WebUI.Models.SelfDestructingMessageModel
+
+<div id="SendMessageResult"></div>
+
+<script type="text/javascript">
+
+    function OnBegin() {
+        $('#SendButton span').text('Sending...');
+        $('#SendButton').fadeOut(3000);
+    }
+
+    function OnComplete() {
+        $('#SendButton span').text('Send Message');
+        $('#SendButton').fadeIn();
+    }
+</script>
+
+<div class="blue-box">
+    
+<h3>Send a message:</h3>    
+
+    @using (Ajax.BeginForm("Send", "SelfDestruct", new AjaxOptions() { OnBegin = "OnBegin", OnComplete = "OnComplete", OnSuccess = "OnSendMessage", UpdateTargetId = "MessageResult", OnFailure = "OnError" }))
+    {
+        <div>
+            @Html.LabelFor(m => m.Email)
+            @Html.EditorFor(m => m.Email)
+            @Html.ValidationMessageFor(m => m.Email)
+        </div>
+        <div>
+            @Html.LabelFor(m => m.MessageText)
+            <br />
+            @Html.TextAreaFor(m => m.MessageText, new { style = "width:90%; horiz-align:center;", rows=10 })
+            @Html.ValidationMessageFor(m => m.MessageText)
+        </div>
+        <button class="ui-button" id="SendButton">
+            Send Message
+        </button>
+    
+    }
+</div>

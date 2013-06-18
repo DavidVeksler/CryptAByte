@@ -1,0 +1,162 @@
+﻿@{
+    Page.Title = "API Documentation and Example";
+}
+<script type="text/javascript" src="../../Scripts/knockout-2.1.0.js"></script>
+<script type="text/javascript" src="../../Scripts/APIUsageDemo.js"></script>
+
+<div id="about" class="ui-widget ui-corner-all grey-box">
+    <h2>Key Service RESTfull API </h2>
+
+    <p>Four operations are currently supported in both online and offline versions:</p>
+    <strong>Online Encryption</strong>
+    <ul>
+        <li>Create Key: POST passphrase</li>
+        <li>Get Messages: GET token,passphrase</li>
+        <li>Send Message: PUT token, message, [files]</li>
+        <li>Delete Key: DELETE token, passphrase</li>
+    </ul>
+
+    <strong>Offline Encryption</strong>
+    <ul>
+        <li>Upload Key: POST publickey, privatekey (optional) privatekeyhash </li>
+        <li>Get Encrypted Messages: GET token,privatekeyhash</li>
+        <li>Send Encrypted Message: PUT token, encryptedmessage,encryptionkey</li>
+        <li><s>Delete Key: DELETE token, privatekeyhash</s></li>
+    </ul>
+
+
+    <p>
+        The sample implementation below uses jQuery and <a href="http://knockoutjs.com/">knockout.js</a>. The
+        service supports
+        <a href="https://en.wikipedia.org/wiki/Cross-origin_resource_sharing">CORS</a>,
+        so you can call it from any URL without the need for JSONP.
+    </p>
+
+    <fieldset>
+        <legend>Offline API:</legend>
+
+        <p>
+            <strong>Offline Key Creation</strong>
+            <br />
+            <em>publickey</em>: RSA public key
+        <br />
+            <em>privatekey</em>: RSA private key encrypted with the passphrase.  This is optional
+            - only needed if you want to allow online decryption
+        <br />
+            <em>privatekeyhash</em>: Any string accepted when using offline decryption, when
+            using online must be SHA256 hash of the RSA private
+            key
+        </p>
+
+        <p>
+            <strong>Offline Messaging</strong>
+            <br />
+            <em>encryptedmessage</em> is a GZIP compressed message which is then encrypted using
+            AES256
+        with a random passphrase
+        <br />
+            <em>encryptionkey</em> is that random passphrase encrypted using the RSA public
+            key
+        
+        </p>
+
+        <p>
+            <strong>Offline Decryption</strong>
+            <br />
+            <em>privatekeyhash</em>: If the key was created online, this must be the SHA256
+            hash of the private key.  If it was created offline, any
+            string can be used as long as it matches the original value specified for the private
+            key.  The function of the privatekeyhash is to authenticate the message request
+            so that the message meta-data (size and date) cannot be retrieved.  (Message size
+            and date are stored in plaintext in the database.)  
+        
+        </p>
+        <p>
+            Refer to the source code of the desktop apps for an example of the offline implementation.
+        </p>
+
+    </fieldset>
+
+    <p>
+        The response format (xml or json) can be specified in requests using either the
+        Accept header or adding "format=" to the request URI. 
+        If no response format is specified, JSON is the default. 
+    </p>
+    <p>
+        Response status codes are: 200 (OK), 304 (No messages sent), 400 (Invalid operation)
+        and 500 (Server error).
+    </p>
+    <p>
+        <strong>Versioning:</strong>
+
+        <br />
+        If you do not send a version string, the latest version is assumed.  If your are
+        consuming the service from an application you should append v={version} as a paramater.
+        <br />
+        The current version is <em>1</em>.
+    </p>
+
+</div>
+
+<div class="ui-corner-all grey-box">
+    <hr />
+    <h2>POST:</h2>
+    <div id="Create-Key">
+        <div>
+            <label>Passphrase:</label>
+            <input data-bind='value:passphrase' />
+        </div>
+        <button class="ui-button" data-bind="css: {'ui-button-disabled': !validPassphrase(), 'ui-state-disabled': !validPassphrase()},enable:validPassphrase(), click:CreateKey">
+            Create Key</button>
+        <em>(Alternative: send publickey as a parameter for offline decryption.)</em>
+    </div>
+    <hr />
+    <h2>PUT:</h2>
+    <div>
+        <div>
+            <label>Message:</label>
+            <br />
+            <textarea data-bind='value:message'></textarea>
+        </div>
+        <button class="ui-button" data-bind="css: {'ui-button-disabled': !validMessage(), 'ui-state-disabled': !validMessage()},enable:validMessage(), click:SendMessage">
+            Send Message</button>
+        <em>(Files can be sent as form data; offline encryption support coming soon.)</em>
+    </div>
+    <hr />
+    <h2>GET:</h2>
+    <div>
+        <div>
+            <label>Token:</label>
+            <input data-bind='value:token' />
+        </div>
+        <button class="ui-button" data-bind='click:GetMessages'>Get Messages</button>
+    </div>
+    <hr />
+    <h2>DELETE:</h2>
+    <div>
+        <button class="ui-button" data-bind='click:DeleteKey'>Delete Key</button>
+    </div>
+    <hr />
+    <h4>Server Response:</h4>
+    <div class="red-box">
+        <label>Messages:</label>
+        <ul data-bind="foreach: messages">
+            <li>MessageId: <span data-bind="text:MessageId"></span>
+                Message: <span data-bind="text:MessageData"></span>
+                Send On: <span data-bind="text:Created"></span>
+                IsFile: <span data-bind="text:IsFile"></span>
+
+            </li>
+        </ul>
+    </div>
+
+    <div class="red-box">
+        <label>Response:</label>
+        <strong data-bind='text: response'></strong>
+    </div>
+
+</div>
+
+<div id="error"></div>
+
+

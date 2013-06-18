@@ -1,0 +1,34 @@
+﻿@{ Layout = null;}
+@model CryptAByte.WebUI.Models.SendMessageModel
+@using (Html.BeginForm("SendMessage", "Home", FormMethod.Post, new { id = "SendMessageForm", enctype = "multipart/form-data" }))
+{
+    
+    <div id="SendMessageStatus"></div>
+    
+    <div id="send-messages" class="blue-box">
+
+        <h2>2: Send Messages &amp; Files to a Key Id</h2>
+        <div>
+            @Html.LabelFor(m => m.KeyToken)
+            @Html.EditorFor(m => m.KeyToken)
+            @Html.ValidationMessageFor(m => m.KeyToken)
+        </div>
+        <div>
+            @Html.LabelFor(m => m.MessageText)
+            @Html.TextAreaFor(m => m.MessageText, new { style = "width:90%; horiz-align:center;" })
+            @Html.ValidationMessageFor(m => m.MessageText)
+        </div>
+        <div>
+            @Html.LabelFor(m => m.UploadFile)
+            <input type="file" name="UploadFile" id="UploadFile" />
+            <div class="progress">
+                <div class="bar"></div>
+                <div class="percent">0%</div>
+            </div>
+        </div>
+
+        <button class="ui-button">
+            Send Message/File to Selected Key
+        </button>
+    </div>
+}

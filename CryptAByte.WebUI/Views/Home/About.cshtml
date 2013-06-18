@@ -1,0 +1,79 @@
+﻿@{
+    //   ViewBag.Title = "Time-Lock： Do Not Decrypt Until ___";
+
+    Page.Title = "About Crypt-A-Byte";
+}
+
+<h2>About</h2>
+
+<div>
+    <p>
+        <strong>Crypt-A-Byte is a set of services offering secure communications on the web.  It can
+            be used via the web interface or via the API.  </strong>
+    </p>
+    
+    <p>More details, including Windows/OS X desktop clients and full <a href="https://cryptabyte.com/Content/CryptAByteEncryptionLibrariesAndTests.7z">source code</a> of all encryption functions coming soon. <a href="http://about.me/davidveksler">About the developer.</a></p>
+
+
+</div>
+
+
+
+
+@Html.Partial("About-Home")
+
+@*<h2>@ViewBag.Message</h2>
+<p>
+    Time-Lock： Do Not Decrypt Until ___
+</p>
+<p>
+    <a href="/Home/RequestKeys">Request Keys</a> | 
+</p>
+<p>
+    Time-Lock provides several ways to keep a secret until a certain time is reached
+    and/or a certain person(s) agree to release it.
+</p>
+<p>
+    There are many good tools for sharing password-protected information, but if you
+    want to releval a secret based on certain criteria such as time or group consensus,
+    you must rely on a trusted third party. Time-Lock allows you to define a set of
+    conditions to handle many different situations
+</p>
+<p>
+    Time-Lock can be used in a way that does not require you to trust it with your secret.
+    You can use the Time-Lock site directly, or you can interface with its API from
+    another application or website.
+</p>
+<p>
+    Here are some ways that you can use Time-Lock:
+</p>
+<ol>
+    <li>Record a secret today and don't reveal it until 7 minutes (or days or years) from
+        now. The secret can automatically be send to a recipient after a certain time or
+        deleted if it is not retrieved.</li>
+    <li>You want to reveal a secret to a friend based on certain criteria which a referee
+        will decide on. You can record the secret with Time-Lock and send the unlock key
+        to the judge and the access key to your friend. The referee can unlock the secret
+        with his key, but he will not be able to read the message. After the referee uses
+        his unlock key, your friend will able to use his access key to read it.</li>
+    <li>You want to leave a message for three friends which requires all three to enter
+        their password to open it.</li>
+    <li>Same as scenario 1, but requires sufficient calculations to ensure that your secret
+        can be kept whether or not you trust Time-Lock and even if the website is not available.
+    </li>
+</ol>
+<ol>
+    <li>Trusted Third Party</li>
+    <li>Mutual Friend</li>
+    <li>Consensus</li>
+    <li>Pre-Calculate key</li>
+</ol>
+<p>
+    <strong>Sources:</strong>
+    <ul>
+        <li>http://www.gwern.net/Self-decrypting%20files</li>
+        <li>https://bcrypt.codeplex.com/</li>
+        <li></li>
+    </ul>
+</p>
+*@

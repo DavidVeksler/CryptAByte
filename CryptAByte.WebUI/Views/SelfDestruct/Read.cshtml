@@ -1,0 +1,39 @@
+﻿@using CryptAByte.WebUI.Controllers
+@model CryptAByte.WebUI.Models.SelfDestructingMessageModel
+@{
+    ViewBag.Title = "Self-Destructing Messaging";  
+}
+
+<h1>Self-Destructing Messaging</h1>
+
+<h2 class="error">Note: the decrypted message below has been erased and can no longer
+    be retrieved
+    from this URL.</h2>
+
+@if (!Model.InvalidMessageId)
+{
+    <div class="grey-box">
+        @Model.MessageText
+    </div>    
+    
+    if (Model.HasAttachment)
+    {
+    <h3>Download attachment:</h3> 
+    <h4><a href="#" onclick="javascript:GetAttachment('@Model.TemporaryDownloadId');">Download
+                Attached File @Model.AttachmentName</a></h4>
+    
+    <p class="red-box">
+        <em>Note: The secure link above is valid for @HomeController.PasswordExpiresInSeconds seconds,
+             after which file will be permanently removed! </em>
+    </p>
+    
+    }
+
+
+}
+else
+{
+    <h2 class="error">
+        @Model.MessageText
+    </h2>
+}
