@@ -1,4 +1,4 @@
-CryptAByte
+**CryptAByte**
 ==========
 
 CryptAByte.com is a free online drop box that enables secure (encrypted) message and file sharing over the web using a public-key infrastructure.
@@ -17,7 +17,20 @@ We use RSA for key pairs, encrypt messages and files using AES 256, and SHA256 f
 
 CryptoPad is a simple AES256 encryption/decryption app.
 
-==========
-*Using ILMerge to create a single binary*
 
-ILMerge.exe /target:CryptoPad /out:CryptoPad2.exe /targetplatform:"v4,C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0" CryptoPad.exe CryptAByte.CryptoLibrary.dll
+==========
+
+**Screenshots**
+
+![CryptAByte Windows CLient](https://raw.github.com/DavidVeksler/CryptAByte/master/screenshots/WinClient.png)
+
+![CryptoPad](https://raw.github.com/DavidVeksler/CryptAByte/master/screenshots/cryptopad.png)
+
+![Website](https://raw.github.com/DavidVeksler/CryptAByte/master/screenshots/Website.png)
+
+
+
+==========
+**Using ILMerge to create a single binary**
+
+*ILMerge.exe /target:CryptoPad /out:CryptoPad2.exe /targetplatform:"v4,C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0" CryptoPad.exe CryptAByte.CryptoLibrary.dll*
