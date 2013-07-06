@@ -12,3 +12,12 @@ Crypt-A-Byte uses public-key encryption just like HTTPS/SSL and OpenPGP/PGP. We 
 However, PGP requires that you and your recipient install and configure encryption software and create and exchange key pairs. When this is not practical, we make it very simple (and free) to share data using the same algorithms over the web.
 
 We use RSA for key pairs, encrypt messages and files using AES 256, and SHA256 for hashing.
+
+==========
+
+CryptoPad is a simple AES256 encryption/decryption app.
+
+==========
+*Using ILMerge to create a single binary*
+
+ILMerge.exe /target:CryptoPad /out:CryptoPad2.exe /targetplatform:"v4,C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0" CryptoPad.exe CryptAByte.CryptoLibrary.dll
