@@ -31,11 +31,11 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.btnEncrypt = new System.Windows.Forms.Button();
-            this.txtClearText = new System.Windows.Forms.TextBox();
-            this.txtPassphrase = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
+            this.txtPassphrase = new System.Windows.Forms.TextBox();
+            this.txtClearText = new System.Windows.Forms.TextBox();
+            this.btnEncrypt = new System.Windows.Forms.Button();
+            this.tabPage2 = new System.Windows.Forms.TabPage();
             this.label2 = new System.Windows.Forms.Label();
             this.txtDecryptPassphrase = new System.Windows.Forms.TextBox();
             this.txtCypertext = new System.Windows.Forms.TextBox();
@@ -67,8 +67,45 @@
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
             this.tabPage1.Size = new System.Drawing.Size(576, 536);
             this.tabPage1.TabIndex = 0;
-            this.tabPage1.Text = "Encypt";
+            this.tabPage1.Text = "Encrypt";
             this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(20, 480);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(80, 26);
+            this.label1.TabIndex = 3;
+            this.label1.Text = "Passphrase:\r\n(blank=random)";
+            // 
+            // txtPassphrase
+            // 
+            this.txtPassphrase.Location = new System.Drawing.Point(120, 485);
+            this.txtPassphrase.Name = "txtPassphrase";
+            this.txtPassphrase.Size = new System.Drawing.Size(244, 20);
+            this.txtPassphrase.TabIndex = 2;
+            this.txtPassphrase.UseSystemPasswordChar = true;
+            // 
+            // txtClearText
+            // 
+            this.txtClearText.Dock = System.Windows.Forms.DockStyle.Top;
+            this.txtClearText.Location = new System.Drawing.Point(3, 3);
+            this.txtClearText.Multiline = true;
+            this.txtClearText.Name = "txtClearText";
+            this.txtClearText.Size = new System.Drawing.Size(570, 461);
+            this.txtClearText.TabIndex = 1;
+            // 
+            // btnEncrypt
+            // 
+            this.btnEncrypt.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnEncrypt.Location = new System.Drawing.Point(399, 485);
+            this.btnEncrypt.Name = "btnEncrypt";
+            this.btnEncrypt.Size = new System.Drawing.Size(159, 34);
+            this.btnEncrypt.TabIndex = 0;
+            this.btnEncrypt.Text = "Encrypt";
+            this.btnEncrypt.UseVisualStyleBackColor = true;
+            this.btnEncrypt.Click += new System.EventHandler(this.btnEncrypt_Click);
             // 
             // tabPage2
             // 
@@ -83,43 +120,6 @@
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Decrypt";
             this.tabPage2.UseVisualStyleBackColor = true;
-            // 
-            // btnEncrypt
-            // 
-            this.btnEncrypt.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnEncrypt.Location = new System.Drawing.Point(399, 485);
-            this.btnEncrypt.Name = "btnEncrypt";
-            this.btnEncrypt.Size = new System.Drawing.Size(159, 34);
-            this.btnEncrypt.TabIndex = 0;
-            this.btnEncrypt.Text = "Encrypt";
-            this.btnEncrypt.UseVisualStyleBackColor = true;
-            this.btnEncrypt.Click += new System.EventHandler(this.btnEncrypt_Click);
-            // 
-            // txtClearText
-            // 
-            this.txtClearText.Dock = System.Windows.Forms.DockStyle.Top;
-            this.txtClearText.Location = new System.Drawing.Point(3, 3);
-            this.txtClearText.Multiline = true;
-            this.txtClearText.Name = "txtClearText";
-            this.txtClearText.Size = new System.Drawing.Size(570, 461);
-            this.txtClearText.TabIndex = 1;
-            // 
-            // txtPassphrase
-            // 
-            this.txtPassphrase.Location = new System.Drawing.Point(120, 485);
-            this.txtPassphrase.Name = "txtPassphrase";
-            this.txtPassphrase.Size = new System.Drawing.Size(244, 20);
-            this.txtPassphrase.TabIndex = 2;
-            this.txtPassphrase.UseSystemPasswordChar = true;
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(20, 480);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(80, 26);
-            this.label1.TabIndex = 3;
-            this.label1.Text = "Passphrase:\r\n(blank=random)";
             // 
             // label2
             // 
