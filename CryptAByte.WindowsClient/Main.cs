@@ -21,7 +21,7 @@ namespace CryptAByte.WindowsClient
 
             Text = string.Format("Crypt-A-Byte Windows Client - (Alpha v {0}, API={1})", Environment.Version, serviceProxy.ServiceUrl);
 
-            tabPage3.DragEnter += DropFileOnSendSelfDestructingEmail;
+            tabPage3.DragDrop += DropFileOnSendSelfDestructingEmail;
 
         }
 
