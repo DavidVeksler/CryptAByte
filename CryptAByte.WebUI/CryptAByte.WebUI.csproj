@@ -94,6 +94,7 @@
   <ItemGroup>
     <Compile Include="App_Start\MiniProfiler.cs" />
     <Compile Include="App_Start\NinjectWebCommon.cs" />
+    <Compile Include="Controllers\PasswordController.cs" />
     <Compile Include="Controllers\SelfDestructController.cs" />
     <Compile Include="Controllers\UtilityController.cs" />
     <Compile Include="Models\ContactFormModel.cs" />
@@ -206,6 +207,7 @@
     <Content Include="Scripts\knockout-2.1.0.debug.js" />
     <Content Include="Scripts\knockout-2.1.0.js" />
     <Content Include="Scripts\modernizr-2.0.6-development-only.js" />
+    <Content Include="Scripts\password-generator.js" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
@@ -302,6 +304,7 @@
     <Content Include="Views\SelfDestruct\Read.cshtml" />
     <Content Include="Views\SelfDestruct\Send.cshtml" />
     <None Include="Properties\PublishProfiles\Release.pubxml" />
+    <Content Include="Views\Password\Index.cshtml" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
