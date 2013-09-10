@@ -1,6 +1,6 @@
 ﻿@model dynamic
 @{
-    ViewBag.Title = "Memorable Password Generator";
+    Page.Title = "Memorable Password Generator";
 }
 
 <h2>Memorable Password Generator</h2>
@@ -9,26 +9,30 @@
 
 
 <div class="grey-box" style="min-height: 400px;">
-
-
+    <h3>
+        Generates strong passwords that are easy to remember.
+        <br/>
+        This service runs in your browser for maximum security.
+    </h3>
 
     <span>
         <label for="length">Length</label>
         <input type="text" value="15" name="length" />
+        <br />
     </span>
 
     <span class="ui-corner-all">
-        <button onclick="$('#password').text(generatePassword($('[name=length]').val(),1));">
+        <button class="ui-button-text ui-widget ui-button" onclick="$('#password').text(generatePassword($('[name=length]').val(),1));">
             Generate memorable password
         </button>
     </span>
 
-    <div class="grey-box" style="margin-top:20px;">
+    <h3 class="grey-box" style="margin-top: 20px;">
         Password:
-        <strong>
-            <label id="password"></label>
-        </strong>
-    </div>
+        <em>
+            <pre style="font-size: 20pt;" id="password"></pre>
+        </em>
+    </h3>
 
 
     <!-- <em>Source: 
