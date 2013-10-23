@@ -48,7 +48,7 @@
     <Compile Include="CryptoProviders\ICryptoProvider.cs" />
     <Compile Include="CryptoProviders\PhoneticPasswordGenerator.cs" />
     <Compile Include="CryptoProviders\SymmetricCryptoProvider.cs" />
-    <Compile Include="EncryptionLibraries\CipherUtility.cs" />
+    <Compile Include="EncryptionLibraries\AESEncryption.cs" />
     <Compile Include="EncryptionLibraries\RSAPrivateKeyEncryption.cs" />
     <Compile Include="EncryptionLibraries\RSAPublicKeyEncryption.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
