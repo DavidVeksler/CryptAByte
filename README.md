@@ -17,6 +17,7 @@ We use RSA for key pairs, encrypt messages and files using AES 256, and SHA256 f
 
 CryptoPad is a simple AES256 encryption/decryption app.
 
+OneTimePad generates one time pads.
 
 ==========
 
@@ -25,6 +26,8 @@ CryptoPad is a simple AES256 encryption/decryption app.
 ![CryptAByte Windows CLient](https://raw.github.com/DavidVeksler/CryptAByte/master/screenshots/WinClient.png)
 
 ![CryptoPad](https://raw.github.com/DavidVeksler/CryptAByte/master/screenshots/cryptopad.png)
+
+![OneTimePad](https://raw.github.com/DavidVeksler/CryptAByte/master/screenshots/OneTimePad.png)
 
 ![Website](https://raw.github.com/DavidVeksler/CryptAByte/master/screenshots/Website.png)
 

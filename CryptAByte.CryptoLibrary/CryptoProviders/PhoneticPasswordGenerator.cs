@@ -10,6 +10,7 @@ namespace CryptAByte.CryptoLibrary.CryptoProviders
     {
         private const string alphabet = "abcdefghijklmnopqrstuvwxyz";
         private static GpwData data;
+        static Random ran = new Random(); // new random source seeded by clock
 
         /// <summary>
         ///   Generates a set of pronounceable passwords.
@@ -29,9 +30,9 @@ namespace CryptAByte.CryptoLibrary.CryptoProviders
             int nchar = 0;
             long ranno = 0;
             double pik = 0;
-            StringBuilder password = new StringBuilder();
-            Random ran = new Random(); // new random source seeded by clock
 
+            StringBuilder password = new StringBuilder("");
+            
             // Pick a random starting point.
             password = new StringBuilder(PasswordLength);
             pik = ran.NextDouble(); // random number [0,1]

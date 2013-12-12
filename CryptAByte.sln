@@ -1,6 +1,10 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{08EA0906-2C54-45F3-8626-04A27AFB1BA4}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptAByte.WebUI", "CryptAByte.WebUI\CryptAByte.WebUI.csproj", "{3CE89356-8503-4CB6-9CF8-5619B3ADFFC8}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptAByte.WebUI.Tests", "CryptAByte.WebUI.Tests\CryptAByte.WebUI.Tests.csproj", "{CFDB7BF0-A526-45C4-98BA-F2A479D06DF1}"
@@ -13,11 +17,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptAByte.CryptoLibrary", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptAByte.WindowsClient", "CryptAByte.WindowsClient\CryptAByte.WindowsClient.csproj", "{22F63326-51E6-4E9F-8790-3367C70BB865}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{08EA0906-2C54-45F3-8626-04A27AFB1BA4}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptAByte.WindowsClient.Tests", "CryptAByte.WindowsClient.Tests\CryptAByte.WindowsClient.Tests.csproj", "{656CB710-92C6-48B1-A5D1-05C737FFDBEA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptoPad", "CryptoPad\CryptoPad.csproj", "{ED8B135F-7A82-416F-849E-6F6CECF2DD3D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Apps", "Apps", "{62312528-DAA2-407F-BF40-E3A655E48ABF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OneTimePad", "OneTimePad\OneTimePad.csproj", "{FA4E2895-B99D-4DD6-996D-141D155F62DD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -57,13 +63,19 @@ Global
 		{ED8B135F-7A82-416F-849E-6F6CECF2DD3D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ED8B135F-7A82-416F-849E-6F6CECF2DD3D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ED8B135F-7A82-416F-849E-6F6CECF2DD3D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FA4E2895-B99D-4DD6-996D-141D155F62DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FA4E2895-B99D-4DD6-996D-141D155F62DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FA4E2895-B99D-4DD6-996D-141D155F62DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FA4E2895-B99D-4DD6-996D-141D155F62DD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{AE2D0ACA-37CD-4A17-A17A-0248D891529D} = {08EA0906-2C54-45F3-8626-04A27AFB1BA4}
 		{CFDB7BF0-A526-45C4-98BA-F2A479D06DF1} = {08EA0906-2C54-45F3-8626-04A27AFB1BA4}
+		{AE2D0ACA-37CD-4A17-A17A-0248D891529D} = {08EA0906-2C54-45F3-8626-04A27AFB1BA4}
 		{656CB710-92C6-48B1-A5D1-05C737FFDBEA} = {08EA0906-2C54-45F3-8626-04A27AFB1BA4}
+		{ED8B135F-7A82-416F-849E-6F6CECF2DD3D} = {62312528-DAA2-407F-BF40-E3A655E48ABF}
+		{FA4E2895-B99D-4DD6-996D-141D155F62DD} = {62312528-DAA2-407F-BF40-E3A655E48ABF}
 	EndGlobalSection
 EndGlobal
