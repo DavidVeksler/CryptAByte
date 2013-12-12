@@ -1,11 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using CryptAByte.CryptoLibrary.CryptoProviders;
 
@@ -29,12 +23,12 @@ namespace OneTimePad
         {
             StringBuilder keys = new StringBuilder();
 
-            for (int i = 0; i < numberOfKeys; i++)
+            for (int i = 1; i < numberOfKeys + 1; i++)
             {
                 string key;
                 if (chkCreatepronounceablepasswords.Checked)
                 {
-                    key = PronounceablePasswordGenerator.Generate((int) keySize);
+                    key = PronounceablePasswordGenerator.Generate((int)keySize);
                 }
                 else
                 {

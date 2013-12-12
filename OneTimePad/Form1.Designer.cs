@@ -42,6 +42,7 @@
             // 
             // label1
             // 
+            this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(12, 471);
             this.label1.Name = "label1";
@@ -51,7 +52,9 @@
             // 
             // txtkeys
             // 
-            this.txtkeys.Dock = System.Windows.Forms.DockStyle.Top;
+            this.txtkeys.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.txtkeys.Location = new System.Drawing.Point(0, 0);
             this.txtkeys.Multiline = true;
             this.txtkeys.Name = "txtkeys";
@@ -60,17 +63,19 @@
             // 
             // btnGenerateKeys
             // 
+            this.btnGenerateKeys.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnGenerateKeys.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnGenerateKeys.Location = new System.Drawing.Point(424, 478);
+            this.btnGenerateKeys.Location = new System.Drawing.Point(343, 478);
             this.btnGenerateKeys.Name = "btnGenerateKeys";
-            this.btnGenerateKeys.Size = new System.Drawing.Size(159, 48);
+            this.btnGenerateKeys.Size = new System.Drawing.Size(240, 48);
             this.btnGenerateKeys.TabIndex = 4;
-            this.btnGenerateKeys.Text = "Generate";
+            this.btnGenerateKeys.Text = "Generate Keys";
             this.btnGenerateKeys.UseVisualStyleBackColor = true;
             this.btnGenerateKeys.Click += new System.EventHandler(this.btnGenerateKeys_Click);
             // 
             // label2
             // 
+            this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label2.AutoSize = true;
             this.label2.Location = new System.Drawing.Point(12, 499);
             this.label2.Name = "label2";
@@ -80,6 +85,7 @@
             // 
             // numKeySize
             // 
+            this.numKeySize.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.numKeySize.Location = new System.Drawing.Point(100, 471);
             this.numKeySize.Minimum = new decimal(new int[] {
             4,
@@ -97,6 +103,7 @@
             // 
             // numNumberOfKeys
             // 
+            this.numNumberOfKeys.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.numNumberOfKeys.Location = new System.Drawing.Point(100, 497);
             this.numNumberOfKeys.Minimum = new decimal(new int[] {
             1,
@@ -114,6 +121,7 @@
             // 
             // chkCreatepronounceablepasswords
             // 
+            this.chkCreatepronounceablepasswords.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.chkCreatepronounceablepasswords.AutoSize = true;
             this.chkCreatepronounceablepasswords.Checked = true;
             this.chkCreatepronounceablepasswords.CheckState = System.Windows.Forms.CheckState.Checked;
