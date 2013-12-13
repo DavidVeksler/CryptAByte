@@ -5,6 +5,8 @@ using CryptAByte.CryptoLibrary.CryptoProviders;
 
 namespace CryptoPad
 {
+    //ILMerge.exe /target:CryptoPad /out:CryptoPad2.exe /targetplatform:"v4,C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0" CryptoPad.exe CryptAByte.CryptoLibrary.dll
+
     public partial class Form1 : Form
     {
         public Form1()

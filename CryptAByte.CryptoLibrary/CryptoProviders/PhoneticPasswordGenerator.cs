@@ -10,7 +10,7 @@ namespace CryptAByte.CryptoLibrary.CryptoProviders
     {
         private const string alphabet = "abcdefghijklmnopqrstuvwxyz";
         private static GpwData data;
-        static Random ran = new Random(); // new random source seeded by clock
+        static StrongRandomNumberGenerator ran = new StrongRandomNumberGenerator();
 
         /// <summary>
         ///   Generates a set of pronounceable passwords.
@@ -35,7 +35,7 @@ namespace CryptAByte.CryptoLibrary.CryptoProviders
             
             // Pick a random starting point.
             password = new StringBuilder(PasswordLength);
-            pik = ran.NextDouble(); // random number [0,1]
+            pik = ran.GetRandomDouble(); // random number [0,1]
 
             ranno = (long) (pik*data.Sigma); // weight by sum of frequencies
             sum = 0;
@@ -72,7 +72,7 @@ namespace CryptAByte.CryptoLibrary.CryptoProviders
                 {
                     break; // exit while loop
                 }
-                pik = ran.NextDouble();
+                pik = ran.GetRandomDouble();
                 ranno = (long) (pik*sum);
                 sum = 0;
                 for (c3 = 0; c3 < 26; c3++)

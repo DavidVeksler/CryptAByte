@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Text;
 using System.Windows.Forms;
 using CryptAByte.CryptoLibrary.CryptoProviders;
@@ -35,9 +36,39 @@ namespace OneTimePad
                     key = SymmetricCryptoProvider.GenerateKeyPhrase((int)keySize).TrimEnd(Convert.ToChar("="));
                 }
 
-                keys.AppendLine(string.Format("{0}, {1}", i, key));
+                int groupSize = (int)numGroupSize.Value;
+
+                if (chkGroupIntoPairs.Checked && groupSize > 0)
+                {
+                    string groupedKey = "";
+
+                    for (int j = 0; j < key.Length; j++)
+                    {
+                        groupedKey += key[j];
+
+                        if ((j +1) % groupSize == 0)
+                        {
+                            groupedKey += "-";
+                        }
+                    }
+
+                    groupedKey = groupedKey.TrimEnd('-');
+
+                    keys.AppendLine(string.Format("{0}, {1}", i, groupedKey));
+                }
+                else
+                {
+                    keys.AppendLine(string.Format("{0}, {1}", i, key));
+                }
+
             }
+
             txtkeys.Text = keys.ToString();
+        }
+
+        private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            Process.Start("https://github.com/DavidVeksler/CryptAByte/tree/master/binaries");
         }
     }
 }

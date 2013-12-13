@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CryptoProviders\RandomNumberGenerator.cs" />
     <Compile Include="GzipCompression.cs" />
     <Compile Include="CryptoProviders\AsymmetricCryptoProvider.cs" />
     <Compile Include="CryptoProviders\ICryptoProvider.cs" />

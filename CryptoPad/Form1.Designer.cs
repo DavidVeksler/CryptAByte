@@ -72,6 +72,7 @@
             // 
             // label1
             // 
+            this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(20, 480);
             this.label1.Name = "label1";
@@ -81,6 +82,7 @@
             // 
             // txtPassphrase
             // 
+            this.txtPassphrase.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.txtPassphrase.Location = new System.Drawing.Point(120, 485);
             this.txtPassphrase.Name = "txtPassphrase";
             this.txtPassphrase.Size = new System.Drawing.Size(244, 20);
@@ -89,7 +91,9 @@
             // 
             // txtClearText
             // 
-            this.txtClearText.Dock = System.Windows.Forms.DockStyle.Top;
+            this.txtClearText.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.txtClearText.Location = new System.Drawing.Point(3, 3);
             this.txtClearText.Multiline = true;
             this.txtClearText.Name = "txtClearText";
@@ -98,6 +102,7 @@
             // 
             // btnEncrypt
             // 
+            this.btnEncrypt.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnEncrypt.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnEncrypt.Location = new System.Drawing.Point(399, 485);
             this.btnEncrypt.Name = "btnEncrypt";
@@ -123,6 +128,7 @@
             // 
             // label2
             // 
+            this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label2.AutoSize = true;
             this.label2.Location = new System.Drawing.Point(23, 492);
             this.label2.Name = "label2";
@@ -132,6 +138,7 @@
             // 
             // txtDecryptPassphrase
             // 
+            this.txtDecryptPassphrase.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.txtDecryptPassphrase.Location = new System.Drawing.Point(120, 492);
             this.txtDecryptPassphrase.Name = "txtDecryptPassphrase";
             this.txtDecryptPassphrase.Size = new System.Drawing.Size(244, 20);
@@ -140,7 +147,9 @@
             // 
             // txtCypertext
             // 
-            this.txtCypertext.Dock = System.Windows.Forms.DockStyle.Top;
+            this.txtCypertext.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.txtCypertext.Location = new System.Drawing.Point(3, 3);
             this.txtCypertext.Multiline = true;
             this.txtCypertext.Name = "txtCypertext";
@@ -149,6 +158,7 @@
             // 
             // btnDecrypt
             // 
+            this.btnDecrypt.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnDecrypt.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnDecrypt.Location = new System.Drawing.Point(399, 492);
             this.btnDecrypt.Name = "btnDecrypt";
