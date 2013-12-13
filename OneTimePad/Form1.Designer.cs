@@ -91,6 +91,11 @@
             // 
             this.numKeySize.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.numKeySize.Location = new System.Drawing.Point(100, 462);
+            this.numKeySize.Maximum = new decimal(new int[] {
+            10000,
+            0,
+            0,
+            0});
             this.numKeySize.Minimum = new decimal(new int[] {
             4,
             0,
@@ -109,6 +114,11 @@
             // 
             this.numNumberOfKeys.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.numNumberOfKeys.Location = new System.Drawing.Point(100, 488);
+            this.numNumberOfKeys.Maximum = new decimal(new int[] {
+            10000000,
+            0,
+            0,
+            0});
             this.numNumberOfKeys.Minimum = new decimal(new int[] {
             1,
             0,
@@ -118,7 +128,7 @@
             this.numNumberOfKeys.Size = new System.Drawing.Size(120, 20);
             this.numNumberOfKeys.TabIndex = 10;
             this.numNumberOfKeys.Value = new decimal(new int[] {
-            10,
+            100,
             0,
             0,
             0});
@@ -140,8 +150,6 @@
             // 
             this.chkGroupIntoPairs.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.chkGroupIntoPairs.AutoSize = true;
-            this.chkGroupIntoPairs.Checked = true;
-            this.chkGroupIntoPairs.CheckState = System.Windows.Forms.CheckState.Checked;
             this.chkGroupIntoPairs.Location = new System.Drawing.Point(15, 534);
             this.chkGroupIntoPairs.Name = "chkGroupIntoPairs";
             this.chkGroupIntoPairs.Size = new System.Drawing.Size(115, 17);
@@ -153,8 +161,8 @@
             // 
             this.numGroupSize.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.numGroupSize.Location = new System.Drawing.Point(136, 531);
-            this.numGroupSize.Minimum = new decimal(new int[] {
-            1,
+            this.numGroupSize.Maximum = new decimal(new int[] {
+            10000,
             0,
             0,
             0});
@@ -169,6 +177,7 @@
             // 
             // linkLabel1
             // 
+            this.linkLabel1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.linkLabel1.AutoSize = true;
             this.linkLabel1.Location = new System.Drawing.Point(303, 534);
             this.linkLabel1.Name = "linkLabel1";
