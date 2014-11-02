@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Net.Mail;
@@ -17,6 +18,7 @@ namespace CryptAByte.WebUI.Controllers
     {
 
         private readonly IRequestRepository requestRepository;
+        readonly string messageFile = ConfigurationManager.AppSettings["MessagesFile"];
 
         public HomeController(IRequestRepository requestRepository)
         {
@@ -69,8 +71,8 @@ namespace CryptAByte.WebUI.Controllers
 
         //    //this.requestRepository.SubscribeEmail/(model.Email);
 
-        //    //MailMessage message = new MailMessage { From = new MailAddress("mail@mises.org") };
-        //    //message.To.Add(new MailAddress("david@mises.org"));
+        //    //MailMessage message = new MailMessage { From = new MailAddress("webmaster@liberty.me") };
+        //    //message.To.Add(new MailAddress("veksler@liberty.me"));
 
         //    //message.Subject = "Subscription from CryptAByte: " + model.Email;
         //    //message.Body = model.Email;
@@ -91,8 +93,8 @@ namespace CryptAByte.WebUI.Controllers
 
             try
             {
-                MailMessage message = new MailMessage { From = new MailAddress("mail@mises.org") };
-                message.To.Add(new MailAddress("david@mises.org"));
+                MailMessage message = new MailMessage { From = new MailAddress("webmaster@liberty.me") };
+                message.To.Add(new MailAddress("veksler@liberty.me"));
 
                 message.Subject = "Feedback from CryptAByte: " + model.Email;
                 message.Body = string.Format(@"
@@ -106,10 +108,9 @@ From: {0}
             }
             catch (Exception ex)
             {
-                System.IO.File.AppendAllText(@"H:\web\SecureKey\CryptAByte.WebUI\messages.txt", model.Email + Environment.NewLine);
-                System.IO.File.AppendAllText(@"H:\web\SecureKey\CryptAByte.WebUI\messages.txt", model.Message + Environment.NewLine);
-
-                System.IO.File.AppendAllText(@"H:\web\SecureKey\CryptAByte.WebUI\messages.txt", ex + Environment.NewLine);
+                System.IO.File.AppendAllText(messageFile, model.Email + Environment.NewLine);
+                System.IO.File.AppendAllText(messageFile, model.Message + Environment.NewLine);
+                System.IO.File.AppendAllText(messageFile, ex + Environment.NewLine);
 
                 return Content("Message sent");
             }
