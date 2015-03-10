@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Entity;
-using System.Data.Objects.DataClasses;
+using System.Data.Entity.Core.Objects.DataClasses;
 using System.Linq;
 using System.Text;
 using System.Xml.Serialization;
@@ -196,7 +196,8 @@ namespace CryptAByte.Domain.KeyManager
         [Required(ErrorMessage = "Please enter message data")]
         public string MessageData { get; set; }
 
-        [System.ComponentModel.DataAnnotations.Timestamp]
+        //[System.ComponentModel.DataAnnotations.Timestamp]
+        // https://stackoverflow.com/questions/20383190/isrowversion-can-only-be-configured-for-byte-array-properties
         //      [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public DateTime Created { get; set; }
 

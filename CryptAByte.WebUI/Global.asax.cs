@@ -47,7 +47,7 @@ namespace CryptAByte.WebUI
             // Use LocalDB for Entity Framework by default
             //Database.DefaultConnectionFactory = new SqlConnectionFactory("Data Source=(localdb)\v11.0; Integrated Security=True; MultipleActiveResultSets=True");
 
-            Database.SetInitializer<CryptAByteContext>(new DropCreateDatabaseIfModelChanges<CryptAByteContext>());
+            //Database.SetInitializer<CryptAByteContext>(new MigrateDatabaseToLatestVersion<CryptAByteContext>());
             
 
             RegisterGlobalFilters(GlobalFilters.Filters);
