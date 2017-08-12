@@ -36,10 +36,8 @@
             <li>The passphrase is not stored and the message is never stored in decrypted form,
                 so it is impossible for the administrator
                 to reveal the message after it is sent.</li>
-            <li>If other than the intended recipient opens the email before it is read, they will
-                be able to read the
-                message.  The intended recipient will know that the email was read because the message
-                will no longer be available.</li>
+            <li>If someone opens your email in your inbox before you, they will
+                be able to read the message.</li>
             <li>The read URL contains a hash of the original message.  This is used to verify that
                 the message has not changed since it was sent -- as might happen if the database
                 used to store the messages was hacked or compromised.</li>
@@ -63,9 +61,7 @@
                 you can use this service.</li>
             <li>We may store the sender's IP address and recipient email address to prevent abuse
                 of this service.  The mail server itself may also keep a record of the recipients
-                email address and a temporary copy of the read URL (containing the passphrase) itself
-                while
-                it is being sent.
+                email address while it is being sent.
             </li>
         </ul>
 
