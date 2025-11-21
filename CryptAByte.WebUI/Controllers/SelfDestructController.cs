@@ -3,25 +3,27 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net.Mail;
 using System.Web;
 using System.Web.Mvc;
 using CryptAByte.CryptoLibrary.CryptoProviders;
 using CryptAByte.Domain.DataContext;
 using CryptAByte.Domain.KeyManager;
 using CryptAByte.Domain.SelfDestructingMessaging;
+using CryptAByte.Domain.Services;
+using CryptAByte.Domain.Utilities;
 using CryptAByte.WebUI.Models;
-using Ionic.Zip;
 
 namespace CryptAByte.WebUI.Controllers
 {
     public class SelfDestructController : Controller
     {
-        private readonly ISelfDestructingMessageRepository selfDestructingMessageRepository;
+        private readonly ISelfDestructingMessageRepository __selfDestructingMessageRepository;
+        private readonly IEmailService _emailService;
 
-        public SelfDestructController(ISelfDestructingMessageRepository selfDestructingMessageRepository)
+        public SelfDestructController(ISelfDestructingMessageRepository _selfDestructingMessageRepository, IEmailService emailService)
         {
-            this.selfDestructingMessageRepository = selfDestructingMessageRepository;
+            __selfDestructingMessageRepository = _selfDestructingMessageRepository ?? throw new ArgumentNullException(nameof(_selfDestructingMessageRepository));
+            _emailService = emailService ?? throw new ArgumentNullException(nameof(emailService));
         }
 
         public ActionResult Index()
@@ -43,7 +45,7 @@ namespace CryptAByte.WebUI.Controllers
 
             passphrase = HttpUtility.UrlEncode(passphrase);
 
-            int messageId = selfDestructingMessageRepository.StoreMessage(new SelfDestructingMessage()
+            int messageId = _selfDestructingMessageRepository.StoreMessage(new SelfDestructingMessage()
             {
                 Message = message.MessageText
             },
@@ -53,39 +55,29 @@ namespace CryptAByte.WebUI.Controllers
 
             string hash = SymmetricCryptoProvider.GetSecureHashForString(message.MessageText);
 
-            const string notification = @"
+            const string notificationTemplate = @"
 Hello,
 
-You have received a self-destructing message.  This message will be decrypted and erased when you open the link below.
+You have received a self-destructing message. This message will be decrypted and erased when you open the link below.
 
-You can read it at 
+You can read it at
 
 https://{0}:{1}/selfdestruct/read/?messageId={2}&passphrase={3}&hash={4}
 
 
-CryptAByte.com is not responsible for the contents of messages.  For more information, please visit https://CryptAByte.com/SelfDestruct
+CryptAByte.com is not responsible for the contents of messages. For more information, please visit https://CryptAByte.com/SelfDestruct
 ";
 
-            MailMessage mailMessage = new MailMessage { From = new MailAddress("webmaster@cryptabyte.com") };
-            mailMessage.To.Add(new MailAddress(message.Email));
-
-            mailMessage.Subject = "New self-destructing message @ CryptAByte";
+            string host = Request?.Url?.Host ?? "cryptabyte.com";
+            int port = Request?.Url?.Port ?? 443;
+            string messageBody = string.Format(notificationTemplate, host, port, messageId, passphrase, hash);
 
             if (Request == null)
             {
-                string messageText = string.Format(notification, "cryptabyte.com", 443, messageId, passphrase, hash);
-
-                Debug.WriteLine(messageText);
-
-                mailMessage.Body = messageText;
-            }
-            else
-            {
-                mailMessage.Body = string.Format(notification, Request.Url.Host, Request.Url.Port, messageId, passphrase, hash); ;
+                Debug.WriteLine(messageBody);
             }
 
-            SmtpClient client = new SmtpClient();
-            client.Send(mailMessage);
+            _emailService.SendEmail(message.Email, "New self-destructing message @ CryptAByte", messageBody);
 
             return Content("Message sent");
         }
@@ -96,7 +88,7 @@ CryptAByte.com is not responsible for the contents of messages.  For more inform
 
             try
             {
-                var message = selfDestructingMessageRepository.GetMessage(messageId, passphrase);
+                var message = _selfDestructingMessageRepository.GetMessage(messageId, passphrase);
 
                 string originalHash = SymmetricCryptoProvider.GetSecureHashForString(message.Message);
 
@@ -146,8 +138,7 @@ CryptAByte.com is not responsible for the contents of messages.  For more inform
 
             try
             {
-
-                SelfDestructingMessageAttachment attachment = selfDestructingMessageRepository.GetAttachment(key.MessageId, key.Passphrase);
+                SelfDestructingMessageAttachment attachment = _selfDestructingMessageRepository.GetAttachment(key.MessageId, key.Passphrase);
 
                 if (attachment == null)
                 {
@@ -155,24 +146,15 @@ CryptAByte.com is not responsible for the contents of messages.  For more inform
                     return Content("File not found. It may have been already downloaded");
                 }
 
-                //string decryptedString = new SymmetricCryptoProvider().DecryptWithKey(attachment.Attachment, key.Passphrase);
-                byte[] decryptedArray = Convert.FromBase64String(attachment.Attachment);
+                string fileName;
+                byte[] fileData = FileUtilities.DecodeAndDecompressFile(attachment.Attachment, out fileName);
 
-                var zipStream = new MemoryStream(decryptedArray);
-                var outputFileStream = new MemoryStream();
-
-                using (ZipFile zip = ZipFile.Read(zipStream))
-                {
-                    zip.First().Extract(outputFileStream);
-                    Response.AppendHeader("Content-Disposition", "attachment; filename=" + zip.First().FileName);
-                }
-
+                Response.AppendHeader("Content-Disposition", "attachment; filename=" + fileName);
                 Response.ContentType = "application/octet-stream";
-                outputFileStream.Seek(0, SeekOrigin.Begin);
-                return new FileStreamResult(outputFileStream, "application/zip");
 
+                return new FileStreamResult(new MemoryStream(fileData), "application/zip");
             }
-            catch (ArgumentNullException ex)
+            catch (ArgumentNullException)
             {
                 Response.StatusCode = 500;
                 return Content("File does not exist.  Was it already downloaded?");

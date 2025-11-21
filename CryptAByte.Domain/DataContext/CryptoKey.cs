@@ -2,13 +2,10 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Data.Entity;
 using System.Data.Entity.Core.Objects.DataClasses;
 using System.Linq;
-using System.Text;
 using System.Xml.Serialization;
 using CryptAByte.CryptoLibrary.CryptoProviders;
-using CryptAByte.Domain.DataContext;
 
 namespace CryptAByte.Domain.KeyManager
 {
@@ -209,17 +206,4 @@ namespace CryptAByte.Domain.KeyManager
         [NotMapped]
         public string TemporaryDownloadId { get; set; }
     }
-
-    public class CryptAByteContext : DbContext
-    {
-        public DbSet<CryptoKey> Keys { get; set; }
-        public DbSet<Notification> Notifications { get; set; }
-        public DbSet<Message> Messages { get; set; }
-
-        public DbSet<SelfDestructingMessage> SelfDestructingMessages { get; set; }
-
-        public DbSet<SelfDestructingMessageAttachment> SelfDestructingMessageAttachments { get; set; }
-    }
-
-    
 }
