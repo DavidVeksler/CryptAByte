@@ -3,26 +3,27 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Linq;
-using System.Net.Mail;
 using System.Web;
 using System.Web.Mvc;
-using Ionic.Zip;
 using CryptAByte.CryptoLibrary.CryptoProviders;
 using CryptAByte.Domain;
 using CryptAByte.Domain.KeyManager;
+using CryptAByte.Domain.Services;
+using CryptAByte.Domain.Utilities;
 using CryptAByte.WebUI.Models;
 
 namespace CryptAByte.WebUI.Controllers
 {
     public class HomeController : Controller
     {
+        private readonly IRequestRepository _requestRepository;
+        private readonly IEmailService _emailService;
+        private readonly string _messageFile = ConfigurationManager.AppSettings["MessagesFile"];
 
-        private readonly IRequestRepository requestRepository;
-        readonly string messageFile = ConfigurationManager.AppSettings["MessagesFile"];
-
-        public HomeController(IRequestRepository requestRepository)
+        public HomeController(IRequestRepository requestRepository, IEmailService emailService)
         {
-            this.requestRepository = requestRepository;
+            _requestRepository = requestRepository ?? throw new ArgumentNullException(nameof(requestRepository));
+            _emailService = emailService ?? throw new ArgumentNullException(nameof(emailService));
 
             if (FilePasswords != null)
             {
@@ -33,11 +34,6 @@ namespace CryptAByte.WebUI.Controllers
 
         public ActionResult Index()
         {
-            //if (!Request.IsLocal && !Request.IsSecureConnection)
-            //{
-            //    return RedirectPermanent("https://cryptabyte.com/");
-            //}
-
             return View();
         }
 
@@ -59,30 +55,6 @@ namespace CryptAByte.WebUI.Controllers
             return View();
         }
 
-        //[HttpPost]
-        //public ActionResult Subscribe(ContactFormModel model)
-        //{
-        //    if (string.IsNullOrWhiteSpace(model.Email))
-        //    {
-        //        return Content("Email required.");
-        //    }
-
-        //    System.IO.File.AppendAllText(@"H:\web\SecureKey\CryptAByte.WebUI\subs.txt",model.Email + Environment.NewLine);
-
-        //    //this.requestRepository.SubscribeEmail/(model.Email);
-
-        //    //MailMessage message = new MailMessage { From = new MailAddress("webmaster@liberty.me") };
-        //    //message.To.Add(new MailAddress("veksler@liberty.me"));
-
-        //    //message.Subject = "Subscription from CryptAByte: " + model.Email;
-        //    //message.Body = model.Email;
-
-        //    //SmtpClient client = new SmtpClient();
-        //    //client.Send(message);
-
-        //    return Content("Subscription success.");
-        //}
-
         [HttpPost]
         public ActionResult SubmitContact(ContactFormModel model)
         {
@@ -93,28 +65,17 @@ namespace CryptAByte.WebUI.Controllers
 
             try
             {
-                MailMessage message = new MailMessage { From = new MailAddress("webmaster@liberty.me") };
-                message.To.Add(new MailAddress("veksler@liberty.me"));
+                string subject = "Feedback from CryptAByte: " + model.Email;
+                string body = string.Format("From: {0}\n{1}", model.Name, model.Message);
 
-                message.Subject = "Feedback from CryptAByte: " + model.Email;
-                message.Body = string.Format(@"
-From: {0}
-{1}
-", model.Name, model.Message);
-
-                SmtpClient client = new SmtpClient();
-                client.Send(message);
-
+                _emailService.SendEmail("webmaster@liberty.me", "veksler@liberty.me", subject, body);
             }
             catch (Exception ex)
             {
-                System.IO.File.AppendAllText(messageFile, model.Email + Environment.NewLine);
-                System.IO.File.AppendAllText(messageFile, model.Message + Environment.NewLine);
-                System.IO.File.AppendAllText(messageFile, ex + Environment.NewLine);
-
-                return Content("Message sent");
+                System.IO.File.AppendAllText(_messageFile, model.Email + Environment.NewLine);
+                System.IO.File.AppendAllText(_messageFile, model.Message + Environment.NewLine);
+                System.IO.File.AppendAllText(_messageFile, ex + Environment.NewLine);
             }
-
 
             return Content("Message sent");
         }
@@ -151,7 +112,7 @@ From: {0}
             {
                 newKeyModel.LockDate = DateTime.Now.AddDays(30);
             }
-            requestRepository.AddRequest(request);
+            _requestRepository.AddRequest(request);
             return View("NewKeyDetails", request);
         }
 
@@ -177,14 +138,14 @@ From: {0}
                 {
                     var uploadFile = Request.Files[0];
 
-                    byte[] fileData = RequestRepository.ReadFully(uploadFile.InputStream);
-                    requestRepository.AttachFileToRequest(message.KeyToken, fileData, uploadFile.FileName);
+                    byte[] fileData = FileUtilities.ReadStreamFully(uploadFile.InputStream);
+                    _requestRepository.AttachFileToRequest(message.KeyToken, fileData, uploadFile.FileName);
 
                     return Content("<h1>File uploaded and sent to Key Id</h1>");
                 }
                 else
                 {
-                    requestRepository.AttachMessageToRequest(message.KeyToken, message.MessageText);
+                    _requestRepository.AttachMessageToRequest(message.KeyToken, message.MessageText);
                     return Content("<h1>Message encrypted and sent to Key Id</h1>");
                 }
 
@@ -200,7 +161,7 @@ From: {0}
         {
             try
             {
-                var messages = requestRepository.GetDecryptedMessagesWithPassphrase(credentials.KeyTokenIdentifier,
+                var messages = _requestRepository.GetDecryptedMessagesWithPassphrase(credentials.KeyTokenIdentifier,
                                                                                 credentials.Passphrase);
 
                 StoreEncryptionKeysInApplicationMemory(messages);
@@ -285,22 +246,16 @@ From: {0}
                 return Content("Temporary password has expired.  Close this popup and re-enter your password.");
             }
 
-            Message message = requestRepository.GetMessageByMessageId(key.MessageId);
+            Message message = _requestRepository.GetMessageByMessageId(key.MessageId);
             string decryptedString = new SymmetricCryptoProvider().DecryptWithKey(message.MessageData, key.Passphrase);
-            byte[] decryptedArray = Convert.FromBase64String(decryptedString);
 
-            var zipStream = new MemoryStream(decryptedArray);
-            var outputFileStream = new MemoryStream();
+            string fileName;
+            byte[] fileData = FileUtilities.DecodeAndDecompressFile(decryptedString, out fileName);
 
-            using (ZipFile zip = ZipFile.Read(zipStream))
-            {
-                zip.First().Extract(outputFileStream);
-                Response.AppendHeader("Content-Disposition", "attachment; filename=" + zip.First().FileName);
-            }
-
+            Response.AppendHeader("Content-Disposition", "attachment; filename=" + fileName);
             Response.ContentType = "application/octet-stream";
-            outputFileStream.Seek(0, SeekOrigin.Begin);
-            return new FileStreamResult(outputFileStream, "application/zip");
+
+            return new FileStreamResult(new MemoryStream(fileData), "application/zip");
         }
 
         #endregion File Downloads

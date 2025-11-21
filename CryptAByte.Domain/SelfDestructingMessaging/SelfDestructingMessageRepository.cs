@@ -1,23 +1,26 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
 using CryptAByte.CryptoLibrary;
 using CryptAByte.CryptoLibrary.CryptoProviders;
 using CryptAByte.Domain.DataContext;
-using CryptAByte.Domain.KeyManager;
-using Ionic.Zip;
+using CryptAByte.Domain.Utilities;
 
 namespace CryptAByte.Domain.SelfDestructingMessaging
 {
     public class SelfDestructingMessageRepository : ISelfDestructingMessageRepository
     {
+        private readonly CryptAByteContext _context;
+
+        public SelfDestructingMessageRepository(CryptAByteContext context)
+        {
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+        }
+
         public int StoreMessage(SelfDestructingMessage selfDestructingMessage, string passphrase, string attachmentName = null,
                                 byte[] attachmentData = null)
         {
             if (selfDestructingMessage == null)
-            {
-                throw new ArgumentOutOfRangeException("selfDestructingMessage required");
-            }
+                throw new ArgumentNullException(nameof(selfDestructingMessage), "Self-destructing message is required.");
 
             selfDestructingMessage.Message = GzipCompression.Compress(selfDestructingMessage.Message);
 
@@ -25,42 +28,30 @@ namespace CryptAByte.Domain.SelfDestructingMessaging
             var crypto = new SymmetricCryptoProvider();
             selfDestructingMessage.Message = crypto.EncryptWithKey(selfDestructingMessage.Message, passphrase);
 
-            var db = new CryptAByteContext();
             SelfDestructingMessageAttachment attachment = null;
 
             // save attachment, if it exists
             if (attachmentData != null && attachmentData.Length > 0)
             {
-                MemoryStream streamOfOriginalFile = new MemoryStream(1024);
+                string compressedFile = FileUtilities.CompressAndEncodeFile(attachmentName, attachmentData);
 
-                using (ZipFile zip = new ZipFile())
+                attachment = new SelfDestructingMessageAttachment
                 {
-                    zip.AddEntry(attachmentName, attachmentData);
-                    // zip.AddEntry(self, fileData);
-                    zip.Save(streamOfOriginalFile);
-                }
-
-                byte[] zippedFile = RequestRepository.ReadFully(streamOfOriginalFile);
-                string fileAsString = Convert.ToBase64String(zippedFile);
-
-                attachment = new SelfDestructingMessageAttachment { Attachment = fileAsString };
-
-                attachment.Attachment = crypto.EncryptWithKey(fileAsString, passphrase);
-                attachment.SentDate = DateTime.Now;
-
-                //db.SelfDestructingMessageAttachments.Add(attachment);
+                    Attachment = crypto.EncryptWithKey(compressedFile, passphrase),
+                    SentDate = DateTime.Now
+                };
             }
 
-            db.SelfDestructingMessages.Add(selfDestructingMessage);
-            db.SaveChanges();
+            _context.SelfDestructingMessages.Add(selfDestructingMessage);
+            _context.SaveChanges();
 
             if (attachment != null)
             {
                 attachment.MessageId = selfDestructingMessage.MessageId;
-                db.SelfDestructingMessageAttachments.Add(attachment);
+                _context.SelfDestructingMessageAttachments.Add(attachment);
 
-                db.ChangeTracker.DetectChanges();
-                db.SaveChanges();
+                _context.ChangeTracker.DetectChanges();
+                _context.SaveChanges();
             }
 
             return selfDestructingMessage.MessageId;
@@ -68,15 +59,10 @@ namespace CryptAByte.Domain.SelfDestructingMessaging
 
         public SelfDestructingMessage GetMessage(int messageId, string passphrase)
         {
-            var db = new CryptAByteContext();
-
-            SelfDestructingMessage message = db.SelfDestructingMessages.SingleOrDefault(m => m.MessageId == messageId);
-            //.Include("SelfDestructingMessageAttachment")
+            SelfDestructingMessage message = _context.SelfDestructingMessages.SingleOrDefault(m => m.MessageId == messageId);
 
             if (message == null)
-            {
-                throw new ArgumentOutOfRangeException("messageId", "Message not found.  Was it already read?");
-            }
+                throw new KeyNotFoundException($"Message with ID {messageId} not found. Was it already read?");
 
             var crypto = new SymmetricCryptoProvider();
 
@@ -85,29 +71,22 @@ namespace CryptAByte.Domain.SelfDestructingMessaging
             {
                 message.Message = crypto.DecryptWithKey(message.Message, passphrase);
 
-                var attachment = db.SelfDestructingMessageAttachments.FirstOrDefault(a => a.MessageId == messageId);
+                var attachment = _context.SelfDestructingMessageAttachments.FirstOrDefault(a => a.MessageId == messageId);
 
                 if (attachment != null)
                 {
                     message.HasAttachment = true;
-                    // todo: get filename here
-
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw new ArgumentOutOfRangeException("passphrase", "server error decrypting message");
+                throw new ArgumentException("Error decrypting message. Invalid passphrase.", nameof(passphrase), ex);
             }
 
             message.Message = GzipCompression.Decompress(message.Message);
 
-            db.SelfDestructingMessages.Remove(message);
-            db.SaveChanges();
-
-            message.SelfDestructingMessageAttachment = new SelfDestructingMessageAttachment
-                {
-                    //   AttachmentName = attachmentName
-                };
+            _context.SelfDestructingMessages.Remove(message);
+            _context.SaveChanges();
 
             return message;
 
@@ -115,20 +94,16 @@ namespace CryptAByte.Domain.SelfDestructingMessaging
 
         public SelfDestructingMessageAttachment GetAttachment(int messageId, string passphrase)
         {
-            var db = new CryptAByteContext();
             var crypto = new SymmetricCryptoProvider();
 
-            var attachment = db.SelfDestructingMessageAttachments.SingleOrDefault(m => m.MessageId == messageId);
+            var attachment = _context.SelfDestructingMessageAttachments.SingleOrDefault(m => m.MessageId == messageId);
 
             if (attachment != null)
             {
                 attachment.Attachment = crypto.DecryptWithKey(attachment.Attachment, passphrase);
-
-                db.SelfDestructingMessageAttachments.Remove(attachment);
-
-                // todo: move decompression to this class
+                _context.SelfDestructingMessageAttachments.Remove(attachment);
             }
-            db.SaveChanges();
+            _context.SaveChanges();
 
             return attachment;
         }

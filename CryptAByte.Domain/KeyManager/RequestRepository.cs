@@ -2,35 +2,40 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
-using System.IO;
 using System.Linq;
-using System.Net.Mail;
+using System.Security;
 using System.Security.Cryptography;
-using CryptAByte.CryptoLibrary.CryptoProviders;
-using Ionic.Zip;
 using CryptAByte.CryptoLibrary;
+using CryptAByte.CryptoLibrary.CryptoProviders;
 using CryptAByte.Domain.DataContext;
+using CryptAByte.Domain.Services;
+using CryptAByte.Domain.Utilities;
 
 namespace CryptAByte.Domain.KeyManager
 {
     public class RequestRepository : IRequestRepository
     {
+        private readonly CryptAByteContext _context;
+        private readonly IEmailService _emailService;
+
+        public RequestRepository(CryptAByteContext context, IEmailService emailService)
+        {
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _emailService = emailService ?? throw new ArgumentNullException(nameof(emailService));
+        }
+
         public void AddRequest(CryptoKey request)
         {
-            //  TODO: Validate key
-
-            var db = new CryptAByteContext();
-            db.Keys.Add(request);
-            db.SaveChanges();
+            _context.Keys.Add(request);
+            _context.SaveChanges();
         }
 
         public CryptoKey GetRequest(string token)
         {
-            Contract.Assert(!string.IsNullOrWhiteSpace(token), "Token/Identifier is required to retrieve the key!");
+            if (string.IsNullOrWhiteSpace(token))
+                throw new ArgumentException("Token/Identifier is required to retrieve the key!", nameof(token));
 
-            var db = new CryptAByteContext();
-            var request = db.Keys.Include("Messages").Include("Notifications").SingleOrDefault(key => key.KeyToken.Equals(token));
+            var request = _context.Keys.Include("Messages").Include("Notifications").SingleOrDefault(key => key.KeyToken.Equals(token));
 
             if (request == null)
                 return null;
@@ -40,16 +45,13 @@ namespace CryptAByte.Domain.KeyManager
                 request.PrivateKey = null;
             }
 
-            if (request == null)
-            {
-                throw new KeyNotFoundException("Key not found for this token!");
-            }
             return request;
         }
 
         public void AttachMessageToRequest(string token, string plainTextMessage)
         {
-            if (string.IsNullOrWhiteSpace(token)) throw new Exception("Token/Identifier is required to attach message!");
+            if (string.IsNullOrWhiteSpace(token))
+                throw new ArgumentException("Token/Identifier is required to attach message!", nameof(token));
 
             // compress message:
             string compressedMessage = GzipCompression.Compress(plainTextMessage);
@@ -61,7 +63,8 @@ namespace CryptAByte.Domain.KeyManager
 
         public void AttachEncryptedMessageToRequest(string token, string encryptedmessage, string encryptionkey)
         {
-            if (string.IsNullOrWhiteSpace(token)) throw new Exception("Token/Identifier is required to attach message!");
+            if (string.IsNullOrWhiteSpace(token))
+                throw new ArgumentException("Token/Identifier is required to attach message!", nameof(token));
 
             AttachDataToKey(token, encryptedmessage, false, encryptionkey);
 
@@ -70,33 +73,20 @@ namespace CryptAByte.Domain.KeyManager
 
         public void AttachFileToRequest(string token, byte[] fileData, string fileName)
         {
-            if (string.IsNullOrWhiteSpace(token)) throw new Exception("Token/Identifier is required to attach message!");
+            if (string.IsNullOrWhiteSpace(token))
+                throw new ArgumentException("Token/Identifier is required to attach message!", nameof(token));
 
-            if (fileData.Length == 0) throw new Exception("File must not be empty.");
-
-            MemoryStream streamOfOriginalFile = new MemoryStream(1024);
-
-            using (ZipFile zip = new ZipFile())
-            {
-                zip.AddEntry(fileName, fileData);
-                zip.Save(streamOfOriginalFile);
-            }
-
-            byte[] zippedFile = ReadFully(streamOfOriginalFile);
-            string fileAsString = Convert.ToBase64String(zippedFile);
-
-            AttachDataToKey(token, fileAsString, true);
-
+            string compressedFile = FileUtilities.CompressAndEncodeFile(fileName, fileData);
+            AttachDataToKey(token, compressedFile, true);
             NotifyOnMessageReceived(token);
         }
 
-        private static void AttachDataToKey(string token, string compressedMessage, bool isFile, string encryptionKey = null)
+        private void AttachDataToKey(string token, string compressedMessage, bool isFile, string encryptionKey = null)
         {
             string hash = null;
             string encryptedPassword;
 
-            var db = new CryptAByteContext();
-            var request = db.Keys.SingleOrDefault(key => key.KeyToken == token);
+            var request = _context.Keys.SingleOrDefault(key => key.KeyToken == token);
 
             string encryptedMessage;
 
@@ -123,54 +113,46 @@ namespace CryptAByte.Domain.KeyManager
                 IsFile = isFile
             });
 
-            db.SaveChanges();
+            _context.SaveChanges();
         }
-
-
 
         public List<Message> GetDecryptedMessagesWithPassphrase(string keyToken, string passphrase)
         {
-            Contract.Assert(!string.IsNullOrWhiteSpace(keyToken), "Token/Identifier is required to retrieve the messages!");
+            if (string.IsNullOrWhiteSpace(keyToken))
+                throw new ArgumentException("Token/Identifier is required to retrieve the messages!", nameof(keyToken));
 
-            var db = new CryptAByteContext();
-            var request = db.Keys.Include("Messages").SingleOrDefault(key => key.KeyToken == keyToken);
+            var request = _context.Keys.Include("Messages").SingleOrDefault(key => key.KeyToken == keyToken);
 
-            if (request == null) throw new ArgumentOutOfRangeException("keyToken", "Request not found for this token.");
+            if (request == null)
+                throw new KeyNotFoundException($"Request not found for token: {keyToken}");
 
             try
             {
                 string privateKey = new SymmetricCryptoProvider().DecryptWithKey(request.PrivateKey, passphrase);
-
                 return GetDecryptedMessagesWithPrivateKey(keyToken, privateKey);
             }
-            catch (ArgumentNullException)
+            catch (ArgumentNullException ex)
             {
-                throw new ArgumentOutOfRangeException("passphrase", "error decrypting private key");
+                throw new ArgumentException("Error decrypting private key. Invalid passphrase.", nameof(passphrase), ex);
             }
-            catch (CryptographicException)
+            catch (CryptographicException ex)
             {
-                throw new ArgumentOutOfRangeException("passphrase", "error decrypting private key");
+                throw new ArgumentException("Error decrypting private key. Invalid passphrase.", nameof(passphrase), ex);
             }
 
         }
 
         public Message GetMessageByMessageId(int messageId)
         {
-            var db = new CryptAByteContext();
-            var message = db.Messages.SingleOrDefault(m => m.MessageId == messageId);
-
-            return message;
+            return _context.Messages.SingleOrDefault(m => m.MessageId == messageId);
         }
 
         public void DeleteKeyWithPassphrase(string token, string passphrase)
         {
-            var db = new CryptAByteContext();
-            var key = db.Keys.Include("Messages").SingleOrDefault(k => k.KeyToken == token);
+            var key = _context.Keys.Include("Messages").SingleOrDefault(k => k.KeyToken == token);
 
             if (key == null)
-            {
-                throw new ArgumentOutOfRangeException("Key for this token not found.  Was it already deleted?");
-            }
+                throw new KeyNotFoundException($"Key for token '{token}' not found. Was it already deleted?");
 
             var crypto = new SymmetricCryptoProvider();
 
@@ -183,26 +165,22 @@ namespace CryptAByte.Domain.KeyManager
                 throw new ArgumentException("Failed to verify passphrase.  A correct passphrase is required to verify the delete request.");
             }
 
-            db.Keys.Remove(key);
-            db.SaveChanges();
+            _context.Keys.Remove(key);
+            _context.SaveChanges();
         }
 
         public List<Message> GetEncryptedMessages(string token, string privateKeyHash)
         {
-            var db = new CryptAByteContext();
-            var request = db.Keys.Include("Messages").SingleOrDefault(key => key.KeyToken == token);
+            var request = _context.Keys.Include("Messages").SingleOrDefault(key => key.KeyToken == token);
 
-            if (request == null) throw new ArgumentOutOfRangeException("keyToken", "Request not found for this token.");
+            if (request == null)
+                throw new KeyNotFoundException($"Request not found for token: {token}");
 
             if (!request.IsReleased)
-            {
-                throw new ArgumentOutOfRangeException("Request is not released");
-            }
+                throw new InvalidOperationException("Request is not released yet.");
 
             if (request.PrivateKeyHash != privateKeyHash)
-            {
-                throw new ArgumentOutOfRangeException("privatekeyhash does not match stored PrivateKeyHash field (or no hash stored)");
-            }
+                throw new UnauthorizedAccessException("Private key hash does not match stored hash.");
 
             return request.Messages.ToList();
             
@@ -210,14 +188,15 @@ namespace CryptAByte.Domain.KeyManager
 
         public List<Message> GetDecryptedMessagesWithPrivateKey(string token, string privateKey)
         {
-            var db = new CryptAByteContext();
-            var request = db.Keys.Include("Messages").SingleOrDefault(key => key.KeyToken == token);
-            var crypto = new AsymmetricCryptoProvider();
+            var request = _context.Keys.Include("Messages").SingleOrDefault(key => key.KeyToken == token);
+
+            if (request == null)
+                throw new KeyNotFoundException($"Request not found for token: {token}");
 
             if (!request.IsReleased)
-            {
-                throw new ArgumentOutOfRangeException("Request is not released");
-            }
+                throw new InvalidOperationException("Request is not released yet.");
+
+            var crypto = new AsymmetricCryptoProvider();
 
             var plaintextMessages = new List<Message>();
 
@@ -253,21 +232,19 @@ namespace CryptAByte.Domain.KeyManager
 
                 if (request.DeleteMessagesAfterReading || request.DeleteKeyAfterReading)
                 {
-                    if (request.DeleteMessagesAfterReading || request.DeleteKeyAfterReading)
+                    if (request.DeleteMessagesAfterReading)
                     {
-                        request.Messages.ToList().ForEach(message => db.Messages.Remove(message));
+                        request.Messages.ToList().ForEach(message => _context.Messages.Remove(message));
                     }
 
                     if (request.DeleteKeyAfterReading)
                     {
-                        db.Keys.Remove(request);
+                        _context.Keys.Remove(request);
                     }
 
-                    db.SaveChanges();
+                    _context.SaveChanges();
                 }
             }
-
-
 
             return plaintextMessages;
         }
@@ -276,52 +253,22 @@ namespace CryptAByte.Domain.KeyManager
         {
             try
             {
-                var db = new CryptAByteContext();
-                var request = db.Keys.Include("Notifications").SingleOrDefault(key => key.KeyToken == token);
+                var request = _context.Keys.Include("Notifications").SingleOrDefault(key => key.KeyToken == token);
 
-                if (request.Notifications.Any())
+                if (request?.Notifications != null && request.Notifications.Any())
                 {
-                    request.Notifications.ToList().ForEach(n =>
+                    const string notificationTemplate = "You have received a message at {0}. You can check it at https://cryptabyte.com/#{1}.";
+
+                    foreach (var notification in request.Notifications)
                     {
-                        // Send email 
-
-                        const string notification = "You have received a message at {0}.  You can check it at https://cryptabyte.com/#{1}.";
-
-                        MailMessage message = new MailMessage { From = new MailAddress("webmaster@cryptabyte.com") };
-                        message.To.Add(new MailAddress(n.Email));
-
-                        message.Subject = "New Message received";
-
-
-                        message.Body = string.Format(notification, DateTime.Now.ToString(), request.KeyToken); ;
-
-                        SmtpClient client = new SmtpClient();
-                        client.Send(message);
-
-
-                    });
+                        string messageBody = string.Format(notificationTemplate, DateTime.Now, request.KeyToken);
+                        _emailService.SendEmail(notification.Email, "New Message received", messageBody);
+                    }
                 }
             }
             catch (Exception ex)
             {
                 Debug.WriteLine(ex);
-            }
-        }
-
-
-        public static byte[] ReadFully(Stream input)
-        {
-            byte[] buffer = new byte[16 * 1024];
-            using (MemoryStream ms = new MemoryStream())
-            {
-                int read;
-                input.Position = 0;
-                while ((read = input.Read(buffer, 0, buffer.Length)) > 0)
-                {
-
-                    ms.Write(buffer, 0, read);
-                }
-                return ms.ToArray();
             }
         }
     }
