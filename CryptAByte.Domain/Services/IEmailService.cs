@@ -1,22 +1,27 @@
+using System.Threading;
+using System.Threading.Tasks;
+
 namespace CryptAByte.Domain.Services
 {
     public interface IEmailService
     {
         /// <summary>
-        /// Sends an email notification.
+        /// Asynchronously sends an email notification using the default sender address.
         /// </summary>
-        /// <param name="toAddress">Recipient email address.</param>
+        /// <param name="recipientAddress">Recipient email address.</param>
         /// <param name="subject">Email subject.</param>
-        /// <param name="body">Email body content.</param>
-        void SendEmail(string toAddress, string subject, string body);
+        /// <param name="bodyContent">Email body content.</param>
+        /// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
+        Task SendEmailAsync(string recipientAddress, string subject, string bodyContent, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Sends an email notification from a specific sender.
+        /// Asynchronously sends an email notification from a specific sender address.
         /// </summary>
-        /// <param name="fromAddress">Sender email address.</param>
-        /// <param name="toAddress">Recipient email address.</param>
+        /// <param name="senderAddress">Sender email address.</param>
+        /// <param name="recipientAddress">Recipient email address.</param>
         /// <param name="subject">Email subject.</param>
-        /// <param name="body">Email body content.</param>
-        void SendEmail(string fromAddress, string toAddress, string subject, string body);
+        /// <param name="bodyContent">Email body content.</param>
+        /// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
+        Task SendEmailAsync(string senderAddress, string recipientAddress, string subject, string bodyContent, CancellationToken cancellationToken = default);
     }
 }

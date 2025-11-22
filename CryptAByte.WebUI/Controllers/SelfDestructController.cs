@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Web;
@@ -17,12 +16,12 @@ namespace CryptAByte.WebUI.Controllers
 {
     public class SelfDestructController : Controller
     {
-        private readonly ISelfDestructingMessageRepository __selfDestructingMessageRepository;
+        private readonly ISelfDestructingMessageRepository _messageRepository;
         private readonly IEmailService _emailService;
 
-        public SelfDestructController(ISelfDestructingMessageRepository _selfDestructingMessageRepository, IEmailService emailService)
+        public SelfDestructController(ISelfDestructingMessageRepository messageRepository, IEmailService emailService)
         {
-            __selfDestructingMessageRepository = _selfDestructingMessageRepository ?? throw new ArgumentNullException(nameof(_selfDestructingMessageRepository));
+            _messageRepository = messageRepository ?? throw new ArgumentNullException(nameof(messageRepository));
             _emailService = emailService ?? throw new ArgumentNullException(nameof(emailService));
         }
 
@@ -33,19 +32,15 @@ namespace CryptAByte.WebUI.Controllers
 
         public ActionResult Send(SelfDestructingMessageModel message)
         {
-            // verify email
-
             if (!Domain.Validation.IsValidEmail(message.Email))
             {
                 throw new ArgumentException("email", "invalid email format");
             }
 
-
             string passphrase = PronounceablePasswordGenerator.Generate(32);
-
             passphrase = HttpUtility.UrlEncode(passphrase);
 
-            int messageId = _selfDestructingMessageRepository.StoreMessage(new SelfDestructingMessage()
+            int messageId = _messageRepository.StoreMessage(new SelfDestructingMessage()
             {
                 Message = message.MessageText
             },
@@ -72,11 +67,6 @@ CryptAByte.com is not responsible for the contents of messages. For more informa
             int port = Request?.Url?.Port ?? 443;
             string messageBody = string.Format(notificationTemplate, host, port, messageId, passphrase, hash);
 
-            if (Request == null)
-            {
-                Debug.WriteLine(messageBody);
-            }
-
             _emailService.SendEmail(message.Email, "New self-destructing message @ CryptAByte", messageBody);
 
             return Content("Message sent");
@@ -88,7 +78,7 @@ CryptAByte.com is not responsible for the contents of messages. For more informa
 
             try
             {
-                var message = _selfDestructingMessageRepository.GetMessage(messageId, passphrase);
+                var message = _messageRepository.GetMessage(messageId, passphrase);
 
                 string originalHash = SymmetricCryptoProvider.GetSecureHashForString(message.Message);
 
@@ -138,7 +128,7 @@ CryptAByte.com is not responsible for the contents of messages. For more informa
 
             try
             {
-                SelfDestructingMessageAttachment attachment = _selfDestructingMessageRepository.GetAttachment(key.MessageId, key.Passphrase);
+                SelfDestructingMessageAttachment attachment = _messageRepository.GetAttachment(key.MessageId, key.Passphrase);
 
                 if (attachment == null)
                 {

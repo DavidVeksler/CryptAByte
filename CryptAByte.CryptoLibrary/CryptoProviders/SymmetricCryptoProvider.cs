@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using CryptAByte.CryptoLibrary.EncryptionLibraries;
@@ -7,54 +8,47 @@ namespace CryptAByte.CryptoLibrary.CryptoProviders
 {
     public class SymmetricCryptoProvider : ICryptoProvider
     {
-        public SymmetricCryptoProvider()
+        private const string DefaultEncryptionSalt = "CryptAByte";
+        private readonly string _encryptionSalt;
+
+        public SymmetricCryptoProvider() : this(DefaultEncryptionSalt)
         {
-            //    Salt = Guid.NewGuid().ToString().Substring(0, 8);
-            Salt = "CryptAByte";
-            //Salt = GenerateKeyPhrase(8);
         }
 
-        public string Salt { get; set; }
-
-        #region ICryptoProvider Members
-
-        public string EncryptWithKey(string input, string key)
+        public SymmetricCryptoProvider(string encryptionSalt)
         {
-            string encrypted = AESEncryption.Encrypt<AesManaged>(input, key, Salt);
-
-            return encrypted;
+            _encryptionSalt = encryptionSalt ?? throw new ArgumentNullException(nameof(encryptionSalt));
         }
 
-        public string DecryptWithKey(string encrypted, string key)
+        public string EncryptWithKey(string plaintext, string encryptionKey)
         {
-            string decrypted = AESEncryption.Decrypt<AesManaged>(encrypted, key, Salt);
-            return decrypted;
+            return AESEncryption.Encrypt<AesManaged>(plaintext, encryptionKey, _encryptionSalt);
         }
 
-        #endregion
+        public string DecryptWithKey(string ciphertext, string decryptionKey)
+        {
+            return AESEncryption.Decrypt<AesManaged>(ciphertext, decryptionKey, _encryptionSalt);
+        }
 
         public static string GetSecureHashForString(string text)
         {
-            UnicodeEncoding UE = new UnicodeEncoding();
-            byte[] message = UE.GetBytes(text);
+            byte[] messageBytes = Encoding.Unicode.GetBytes(text);
 
-            SHA256Managed hashString = new SHA256Managed();
-            string hex = "";
-
-            byte[] hashValue = hashString.ComputeHash(message);
-            foreach (byte x in hashValue)
+            using (var hashAlgorithm = SHA256.Create())
             {
-                hex += String.Format("{0:x2}", x);
+                byte[] hashValue = hashAlgorithm.ComputeHash(messageBytes);
+                return string.Concat(hashValue.Select(b => b.ToString("x2")));
             }
-            return hex;
         }
 
-        public static string GenerateKeyPhrase(int size = 128)
+        public static string GenerateKeyPhrase(int sizeInBytes = 128)
         {
-            var rnd = RandomNumberGenerator.Create();
-            byte[] randomNumber = new byte[size];
-            rnd.GetBytes(randomNumber);
-            return Convert.ToBase64String(randomNumber);
+            using (var randomNumberGenerator = RandomNumberGenerator.Create())
+            {
+                byte[] randomBytes = new byte[sizeInBytes];
+                randomNumberGenerator.GetBytes(randomBytes);
+                return Convert.ToBase64String(randomBytes);
+            }
         }
     }
 }

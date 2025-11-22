@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Linq;
 using System.Security;
 using System.Security.Cryptography;
+using System.Threading.Tasks;
 using CryptAByte.CryptoLibrary;
 using CryptAByte.CryptoLibrary.CryptoProviders;
 using CryptAByte.Domain.DataContext;
@@ -48,37 +48,36 @@ namespace CryptAByte.Domain.KeyManager
             return request;
         }
 
-        public void AttachMessageToRequest(string token, string plainTextMessage)
+        public async Task AttachMessageToRequestAsync(string token, string plainTextMessage)
         {
             if (string.IsNullOrWhiteSpace(token))
                 throw new ArgumentException("Token/Identifier is required to attach message!", nameof(token));
 
-            // compress message:
             string compressedMessage = GzipCompression.Compress(plainTextMessage);
 
             AttachDataToKey(token, compressedMessage, false);
 
-            NotifyOnMessageReceived(token);
+            await NotifyKeyOwnerOfNewMessageAsync(token).ConfigureAwait(false);
         }
 
-        public void AttachEncryptedMessageToRequest(string token, string encryptedmessage, string encryptionkey)
+        public async Task AttachEncryptedMessageToRequestAsync(string token, string encryptedMessage, string encryptionKey)
         {
             if (string.IsNullOrWhiteSpace(token))
                 throw new ArgumentException("Token/Identifier is required to attach message!", nameof(token));
 
-            AttachDataToKey(token, encryptedmessage, false, encryptionkey);
+            AttachDataToKey(token, encryptedMessage, false, encryptionKey);
 
-            NotifyOnMessageReceived(token);
+            await NotifyKeyOwnerOfNewMessageAsync(token).ConfigureAwait(false);
         }
 
-        public void AttachFileToRequest(string token, byte[] fileData, string fileName)
+        public async Task AttachFileToRequestAsync(string token, byte[] fileData, string fileName)
         {
             if (string.IsNullOrWhiteSpace(token))
                 throw new ArgumentException("Token/Identifier is required to attach message!", nameof(token));
 
             string compressedFile = FileUtilities.CompressAndEncodeFile(fileName, fileData);
             AttachDataToKey(token, compressedFile, true);
-            NotifyOnMessageReceived(token);
+            await NotifyKeyOwnerOfNewMessageAsync(token).ConfigureAwait(false);
         }
 
         private void AttachDataToKey(string token, string compressedMessage, bool isFile, string encryptionKey = null)
@@ -213,16 +212,10 @@ namespace CryptAByte.Domain.KeyManager
                                                           retrievedMessage.MessageData = decryptedMessage;
                                                           retrievedMessage.EncryptionKey = messageDecryptionKey;
 
-
                                                           if (!retrievedMessage.IsFile)
                                                           {
                                                               retrievedMessage.MessageData =
                                                                   GzipCompression.Decompress(retrievedMessage.MessageData);
-                                                          }
-                                                          else
-                                                          {
-                                                              // this is a zip file
-
                                                           }
 
                                                           plaintextMessages.Add(retrievedMessage);
@@ -249,26 +242,24 @@ namespace CryptAByte.Domain.KeyManager
             return plaintextMessages;
         }
 
-        public void NotifyOnMessageReceived(string token)
+        private async Task NotifyKeyOwnerOfNewMessageAsync(string keyToken)
         {
             try
             {
-                var request = _context.Keys.Include("Notifications").SingleOrDefault(key => key.KeyToken == token);
+                var cryptoKey = _context.Keys.Include("Notifications").SingleOrDefault(key => key.KeyToken == keyToken);
 
-                if (request?.Notifications != null && request.Notifications.Any())
+                if (cryptoKey?.Notifications == null || !cryptoKey.Notifications.Any())
+                    return;
+
+                foreach (var notification in cryptoKey.Notifications)
                 {
-                    const string notificationTemplate = "You have received a message at {0}. You can check it at https://cryptabyte.com/#{1}.";
-
-                    foreach (var notification in request.Notifications)
-                    {
-                        string messageBody = string.Format(notificationTemplate, DateTime.Now, request.KeyToken);
-                        _emailService.SendEmail(notification.Email, "New Message received", messageBody);
-                    }
+                    string emailBody = $"You have received a message at {DateTime.Now}. You can check it at https://cryptabyte.com/#{cryptoKey.KeyToken}.";
+                    await _emailService.SendEmailAsync(notification.Email, "New Message Received", emailBody).ConfigureAwait(false);
                 }
             }
-            catch (Exception ex)
+            catch
             {
-                Debug.WriteLine(ex);
+                // Notification failures should not prevent message storage
             }
         }
     }

@@ -10,20 +10,18 @@ namespace CryptAByte.WebUI.Controllers
 {
     public class ServiceController : Controller
     {
-        private readonly IRequestRepository requestRepository;
-        private readonly ISelfDestructingMessageRepository selfDestructingMessageRepository;
+        private readonly IRequestRepository _requestRepository;
+        private readonly ISelfDestructingMessageRepository _selfDestructingMessageRepository;
 
         public ServiceController(IRequestRepository requestRepository, ISelfDestructingMessageRepository selfDestructingMessageRepository)
         {
-            this.requestRepository = requestRepository;
-            this.selfDestructingMessageRepository = selfDestructingMessageRepository;
+            _requestRepository = requestRepository ?? throw new ArgumentNullException(nameof(requestRepository));
+            _selfDestructingMessageRepository = selfDestructingMessageRepository ?? throw new ArgumentNullException(nameof(selfDestructingMessageRepository));
         }
 
         [ValidateInput(false)]
-        public ActionResult Index(string passphrase = null, string publickey = null, string privatekey = null, string privatekeyhash = null, string token = null, string message = null, string encryptedmessage = null, string encryptionkey = null)
+        public ActionResult Index(string passphrase = null, string publicKey = null, string privateKey = null, string privateKeyHash = null, string token = null, string message = null, string encryptedMessage = null, string encryptionKey = null)
         {
-            #region Optionally - send sensitive parameters in request header
-
             if (Request.Headers["publickey"] != null)
             {
                 token = Request.Headers["publickey"];
@@ -44,21 +42,19 @@ namespace CryptAByte.WebUI.Controllers
                 passphrase = Request.Headers["passphrase"];
             }
 
-            #endregion Optionally - send parameters in request header
-
             if (Request.HttpMethod == "GET" && token != null)
             {
-                return GetMessages(token, passphrase, privatekeyhash);
+                return GetMessages(token, passphrase, privateKeyHash);
             }
-            if (Request.HttpMethod == "POST") // Create Key
+            if (Request.HttpMethod == "POST")
             {
-                return Create(passphrase, publickey, privatekey);
+                return Create(passphrase, publicKey, privateKey);
             }
-            if (Request.HttpMethod == "PUT") // Send Message
+            if (Request.HttpMethod == "PUT")
             {
-                return SendMessage(token, message, encryptedmessage, encryptionkey);
+                return SendMessage(token, message, encryptedMessage, encryptionKey);
             }
-            if (Request.HttpMethod == "DELETE") // Delete Token
+            if (Request.HttpMethod == "DELETE")
             {
                 return DeleteKey(token, passphrase);
             }
@@ -68,115 +64,101 @@ namespace CryptAByte.WebUI.Controllers
 
         [HttpPost]
         [ValidateInput(false)]
-        public ActionResult Create(string passphrase = null, string publickey = null, string privatekey = null, string privatekeyhash = null, DateTime? releasedate = null)
+        public ActionResult Create(string passphrase = null, string publicKey = null, string privateKey = null, string privateKeyHash = null, DateTime? releaseDate = null)
         {
-            if (string.IsNullOrWhiteSpace(passphrase) && string.IsNullOrWhiteSpace(publickey))
+            if (string.IsNullOrWhiteSpace(passphrase) && string.IsNullOrWhiteSpace(publicKey))
             {
                 Response.StatusCode = 400;
-                // Response.Status = "MissingPassphraseOrPublicKey";
-                return SerializeResult("Either a passphrase or a publickey parameter is required");
+                return SerializeResult("Either a passphrase or a public key parameter is required");
             }
 
-            if (!string.IsNullOrWhiteSpace(publickey) && string.IsNullOrWhiteSpace(privatekey))
+            if (!string.IsNullOrWhiteSpace(publicKey) && string.IsNullOrWhiteSpace(privateKey))
             {
                 Response.StatusCode = 400;
-                return SerializeResult("When sneding the public key, you must also send the privatekeyhash");
+                return SerializeResult("When sending the public key, you must also send the private key hash");
             }
 
             CryptoKey key = !string.IsNullOrWhiteSpace(passphrase)
-                                ? CryptoKey.CreateRequestWithPassPhrase(passphrase)
-                                : CryptoKey.CreateRequestWithPublicKey(publickey, privatekey, true, privatekeyhash);
+                                ? CryptoKey.CreateWithPassphraseProtectedKeys(passphrase)
+                                : CryptoKey.CreateWithProvidedKeys(publicKey, privateKey, true, privateKeyHash);
 
-            if (releasedate != null)
+            if (releaseDate != null)
             {
-                key.ReleaseDate = (DateTime)releasedate;
+                key.ReleaseDate = (DateTime)releaseDate;
             }
 
-            requestRepository.AddRequest(key);
+            _requestRepository.AddRequest(key);
 
             return SerializeResult(key);
         }
 
-
-
-        //http://localhost:62633/Service/Get?token=a073f62e-e2de-48b9-8002-ac5994528038
         public ActionResult GetToken(string token)
         {
-            var request = requestRepository.GetRequest(token);
+            var request = _requestRepository.GetRequest(token);
 
             return SerializeResult(request);
         }
 
-        // http://localhost:62633/Service/AddMessage?token=a073f62e-e2de-48b9-8002-ac5994528038&message=hello world
-        //[HttpPost]
-        public ActionResult SendMessage(string token, string message, string encryptedmessage, string encryptionkey)
+        public ActionResult SendMessage(string token, string message, string encryptedMessage, string encryptionKey)
         {
-            if (Request.Files.Count == 0 && string.IsNullOrWhiteSpace(message) && string.IsNullOrWhiteSpace(encryptedmessage))
+            if (Request.Files.Count == 0 && string.IsNullOrWhiteSpace(message) && string.IsNullOrWhiteSpace(encryptedMessage))
             {
                 Response.StatusCode = 400;
-                return SerializeResult("Message or encryptedmessage or file required");
+                return SerializeResult("Message, encrypted message, or file required");
             }
 
             if (Request.Files.Count > 0)
             {
                 var uploadFile = Request.Files[0];
-
                 byte[] fileData = RequestRepository.ReadFully(uploadFile.InputStream);
-                requestRepository.AttachFileToRequest(token, fileData, uploadFile.FileName);
+                _requestRepository.AttachFileToRequestAsync(token, fileData, uploadFile.FileName).Wait();
             }
 
             if (!string.IsNullOrWhiteSpace(message))
             {
-                requestRepository.AttachMessageToRequest(token, message);
+                _requestRepository.AttachMessageToRequestAsync(token, message).Wait();
             }
 
-            if (!string.IsNullOrWhiteSpace(encryptedmessage))
+            if (!string.IsNullOrWhiteSpace(encryptedMessage))
             {
-                requestRepository.AttachEncryptedMessageToRequest(token, encryptedmessage, encryptionkey);
+                _requestRepository.AttachEncryptedMessageToRequestAsync(token, encryptedMessage, encryptionKey).Wait();
             }
 
             return SerializeResult(true);
         }
 
-        // http://localhost:62633/Service/AddMessage?token=a073f62e-e2de-48b9-8002-ac5994528038&message=hello world
-        //[HttpPost]
-        public ActionResult GetMessages(string token, string passphrase, string privatekeyhash)
+        public ActionResult GetMessages(string token, string passphrase, string privateKeyHash)
         {
             if (string.IsNullOrWhiteSpace(token))
             {
                 Response.StatusCode = 400;
-                //  Response.Status = "MissingToken";
-                return SerializeResult("token is required");
-
+                return SerializeResult("Token is required");
             }
 
-            if (string.IsNullOrWhiteSpace(passphrase) && string.IsNullOrWhiteSpace(privatekeyhash))
+            if (string.IsNullOrWhiteSpace(passphrase) && string.IsNullOrWhiteSpace(privateKeyHash))
             {
                 Response.StatusCode = 400;
-                //  Response.Status = "MissingPassphrase";
-                return SerializeResult("passphrase is required");
+                return SerializeResult("Passphrase or private key hash is required");
             }
 
             try
             {
-                if (string.IsNullOrWhiteSpace(passphrase))
+                if (!string.IsNullOrWhiteSpace(passphrase))
                 {
-                    var messages = requestRepository.GetDecryptedMessagesWithPassphrase(token, passphrase);
+                    var messages = _requestRepository.GetDecryptedMessagesWithPassphrase(token, passphrase);
 
                     HomeController.StoreEncryptionKeysInApplicationMemory(messages);
 
                     if (messages == null || messages.Count == 0)
                     {
-                        Response.StatusCode = 304; // not modified
+                        Response.StatusCode = 304;
                         return SerializeResult(new List<Message>());
-
                     }
                     return SerializeResult(messages);
                 }
                 else
                 {
-                    // return messages
-                    var messages = requestRepository.GetEncryptedMessages(token, privatekeyhash);
+                    var messages = _requestRepository.GetEncryptedMessages(token, privateKeyHash);
                     return SerializeResult(messages);
                 }
             }
@@ -185,12 +167,11 @@ namespace CryptAByte.WebUI.Controllers
                 Response.StatusCode = 404;
                 return SerializeResult(new { ex.Message });
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 Response.StatusCode = 500;
                 return SerializeResult("Server error decrypting messages.");
             }
-
         }
 
 
@@ -255,7 +236,7 @@ namespace CryptAByte.WebUI.Controllers
 
             try
             {
-                requestRepository.DeleteKeyWithPassphrase(token, passphrase);
+                _requestRepository.DeleteKeyWithPassphrase(token, passphrase);
 
                 return SerializeResult("Deleted.");
             }
