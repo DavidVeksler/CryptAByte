@@ -11,85 +11,73 @@ namespace CryptAByte.Domain.KeyManager
 {
     public sealed class CryptoKey
     {
-        #region Constructors
-
-        /// <summary>
-        /// only use for Serialization
-        /// </summary>
-        public CryptoKey() { }
-
-        public static CryptoKey CreateRequest(DateTime? releaseDate = null)
+        public CryptoKey()
         {
-            var key = AsymmetricCryptoProvider.GenerateKeys();
-
-            var request = new CryptoKey
-                              {
-                                  RequestDate = DateTime.Now,
-                                  ReleaseDate = releaseDate ?? DateTime.Now,
-                                  KeyToken = UniqueIdGenerator.GetUniqueId(),
-                                  PrivateKey = key.PrivateKey,
-                                  PublicKey = key.PublicKey,
-                                  IsPrivateKeyEncrypted = false,
-                                  IsPublicKeyOnly = false,
-                                  Notifications = new EntityCollection<Notification>(),
-                                  Messages = new EntityCollection<Message>(),
-                              };
-
-
-            return request;
         }
 
-        public static CryptoKey CreateRequestWithPassPhrase(string passphrase)
+        public static CryptoKey CreateWithGeneratedKeys(DateTime? releaseDate = null)
         {
-            var key = AsymmetricCryptoProvider.GenerateKeys();
+            var keyPair = AsymmetricCryptoProvider.GenerateKeys();
+            DateTime now = DateTime.UtcNow;
 
-            var request = new CryptoKey
-                              {
-                                  RequestDate = DateTime.UtcNow,
-                                  ReleaseDate = DateTime.Now,
-                                  KeyToken = UniqueIdGenerator.GetUniqueId(),
-                                  PublicKey = key.PublicKey,
-                                  PrivateKey = new SymmetricCryptoProvider().EncryptWithKey(key.PrivateKey, passphrase),
-                                  PrivateKeyHash = SymmetricCryptoProvider.GetSecureHashForString(key.PrivateKey),
-                                  IsPrivateKeyEncrypted = true,
-                                  IsPublicKeyOnly = false,
-                                  Notifications = new EntityCollection<Notification>(),
-                                  Messages = new EntityCollection<Message>(),
-                              };
-
-            return request;
+            return new CryptoKey
+            {
+                RequestDate = now,
+                ReleaseDate = releaseDate ?? now,
+                KeyToken = UniqueIdGenerator.GetUniqueId(),
+                PrivateKey = keyPair.PrivateKey,
+                PublicKey = keyPair.PublicKey,
+                IsPrivateKeyEncrypted = false,
+                IsPublicKeyOnly = false,
+                Notifications = new EntityCollection<Notification>(),
+                Messages = new EntityCollection<Message>(),
+            };
         }
 
-        public static CryptoKey CreateRequestWithPublicKey(string publicKey, string privatekey, bool IsPrivateKeyEncrypted, string privateKeyHash = null)
+        public static CryptoKey CreateWithPassphraseProtectedKeys(string passphrase)
         {
-            var request = new CryptoKey
-                              {
-                                  RequestDate = DateTime.UtcNow,
-                                  ReleaseDate = DateTime.Now,
-                                  KeyToken = UniqueIdGenerator.GetUniqueId(),
-                                  PublicKey = publicKey,
-                                  PrivateKey = privatekey,
-                                  PrivateKeyHash = privateKeyHash,
-                                  IsPrivateKeyEncrypted = IsPrivateKeyEncrypted,
-                                  Notifications = new EntityCollection<Notification>(),
-                                  Messages = new EntityCollection<Message>(),
-                              };
+            if (string.IsNullOrWhiteSpace(passphrase))
+                throw new ArgumentException("Passphrase cannot be empty.", nameof(passphrase));
 
-            return request;
+            var keyPair = AsymmetricCryptoProvider.GenerateKeys();
+            var symmetricProvider = new SymmetricCryptoProvider();
+
+            return new CryptoKey
+            {
+                RequestDate = DateTime.UtcNow,
+                ReleaseDate = DateTime.UtcNow,
+                KeyToken = UniqueIdGenerator.GetUniqueId(),
+                PublicKey = keyPair.PublicKey,
+                PrivateKey = symmetricProvider.EncryptWithKey(keyPair.PrivateKey, passphrase),
+                PrivateKeyHash = SymmetricCryptoProvider.GetSecureHashForString(keyPair.PrivateKey),
+                IsPrivateKeyEncrypted = true,
+                IsPublicKeyOnly = false,
+                Notifications = new EntityCollection<Notification>(),
+                Messages = new EntityCollection<Message>(),
+            };
         }
 
-
-
-        public CryptoKey(DateTime releaseDate, DateTime requestDate, string token, KeyPair keys)
+        public static CryptoKey CreateWithProvidedKeys(string publicKey, string privateKey, bool isPrivateKeyEncrypted, string privateKeyHash = null)
         {
-            ReleaseDate = releaseDate;
-            RequestDate = requestDate;
-            KeyToken = token;
-            PrivateKey = keys.PrivateKey;
-            PublicKey = keys.PublicKey;
-        }
+            if (string.IsNullOrWhiteSpace(publicKey))
+                throw new ArgumentException("Public key cannot be empty.", nameof(publicKey));
 
-        #endregion Constructors
+            if (string.IsNullOrWhiteSpace(privateKey))
+                throw new ArgumentException("Private key cannot be empty.", nameof(privateKey));
+
+            return new CryptoKey
+            {
+                RequestDate = DateTime.UtcNow,
+                ReleaseDate = DateTime.UtcNow,
+                KeyToken = UniqueIdGenerator.GetUniqueId(),
+                PublicKey = publicKey,
+                PrivateKey = privateKey,
+                PrivateKeyHash = privateKeyHash,
+                IsPrivateKeyEncrypted = isPrivateKeyEncrypted,
+                Notifications = new EntityCollection<Notification>(),
+                Messages = new EntityCollection<Message>(),
+            };
+        }
 
         #region Derived Properties
 
@@ -147,7 +135,6 @@ namespace CryptAByte.Domain.KeyManager
         [XmlIgnore()]
         public ICollection<Message> Messages { get; set; }
 
-        //[EditorVisibile(EditorVisibility.Advanced)]
         [XmlElement("Messages")]
         public List<Message> MessagesSerialized
         {
@@ -193,9 +180,6 @@ namespace CryptAByte.Domain.KeyManager
         [Required(ErrorMessage = "Please enter message data")]
         public string MessageData { get; set; }
 
-        //[System.ComponentModel.DataAnnotations.Timestamp]
-        // https://stackoverflow.com/questions/20383190/isrowversion-can-only-be-configured-for-byte-array-properties
-        //      [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public DateTime Created { get; set; }
 
         public string MessageHash { get; set; }

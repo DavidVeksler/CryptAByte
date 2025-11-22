@@ -1,54 +1,55 @@
 using System;
 using System.Configuration;
 using System.Net.Mail;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace CryptAByte.Domain.Services
 {
     public class EmailService : IEmailService
     {
-        private readonly string _defaultFromAddress;
+        private readonly string _defaultSenderAddress;
 
         public EmailService()
         {
-            // Default sender address - can be overridden via configuration
-            _defaultFromAddress = ConfigurationManager.AppSettings["DefaultEmailSender"]
+            _defaultSenderAddress = ConfigurationManager.AppSettings["DefaultEmailSender"]
                                   ?? "webmaster@cryptabyte.com";
         }
 
-        public EmailService(string defaultFromAddress)
+        public EmailService(string defaultSenderAddress)
         {
-            if (string.IsNullOrWhiteSpace(defaultFromAddress))
-                throw new ArgumentException("Default from address cannot be empty.", nameof(defaultFromAddress));
+            if (string.IsNullOrWhiteSpace(defaultSenderAddress))
+                throw new ArgumentException("Sender address cannot be empty.", nameof(defaultSenderAddress));
 
-            _defaultFromAddress = defaultFromAddress;
+            _defaultSenderAddress = defaultSenderAddress;
         }
 
-        public void SendEmail(string toAddress, string subject, string body)
+        public Task SendEmailAsync(string recipientAddress, string subject, string bodyContent, CancellationToken cancellationToken = default)
         {
-            SendEmail(_defaultFromAddress, toAddress, subject, body);
+            return SendEmailAsync(_defaultSenderAddress, recipientAddress, subject, bodyContent, cancellationToken);
         }
 
-        public void SendEmail(string fromAddress, string toAddress, string subject, string body)
+        public async Task SendEmailAsync(string senderAddress, string recipientAddress, string subject, string bodyContent, CancellationToken cancellationToken = default)
         {
-            if (string.IsNullOrWhiteSpace(fromAddress))
-                throw new ArgumentException("From address cannot be empty.", nameof(fromAddress));
+            if (string.IsNullOrWhiteSpace(senderAddress))
+                throw new ArgumentException("Sender address cannot be empty.", nameof(senderAddress));
 
-            if (string.IsNullOrWhiteSpace(toAddress))
-                throw new ArgumentException("To address cannot be empty.", nameof(toAddress));
+            if (string.IsNullOrWhiteSpace(recipientAddress))
+                throw new ArgumentException("Recipient address cannot be empty.", nameof(recipientAddress));
 
             if (string.IsNullOrWhiteSpace(subject))
                 throw new ArgumentException("Subject cannot be empty.", nameof(subject));
 
             using (var mailMessage = new MailMessage())
             {
-                mailMessage.From = new MailAddress(fromAddress);
-                mailMessage.To.Add(new MailAddress(toAddress));
+                mailMessage.From = new MailAddress(senderAddress);
+                mailMessage.To.Add(new MailAddress(recipientAddress));
                 mailMessage.Subject = subject;
-                mailMessage.Body = body;
+                mailMessage.Body = bodyContent;
 
                 using (var smtpClient = new SmtpClient())
                 {
-                    smtpClient.Send(mailMessage);
+                    await smtpClient.SendMailAsync(mailMessage).ConfigureAwait(false);
                 }
             }
         }

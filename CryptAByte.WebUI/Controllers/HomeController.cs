@@ -48,8 +48,6 @@ namespace CryptAByte.WebUI.Controllers
             return View();
         }
 
-        #region Contact Form
-
         public ActionResult Contact()
         {
             return View();
@@ -65,10 +63,10 @@ namespace CryptAByte.WebUI.Controllers
 
             try
             {
-                string subject = "Feedback from CryptAByte: " + model.Email;
-                string body = string.Format("From: {0}\n{1}", model.Name, model.Message);
+                string subject = $"Feedback from CryptAByte: {model.Email}";
+                string body = $"From: {model.Name}\n{model.Message}";
 
-                _emailService.SendEmail("webmaster@liberty.me", "veksler@liberty.me", subject, body);
+                _emailService.SendEmailAsync("webmaster@liberty.me", "veksler@liberty.me", subject, body).Wait();
             }
             catch (Exception ex)
             {
@@ -79,8 +77,6 @@ namespace CryptAByte.WebUI.Controllers
 
             return Content("Message sent");
         }
-
-        #endregion Contact Form
 
         #region Crypto Actions
 
@@ -96,7 +92,7 @@ namespace CryptAByte.WebUI.Controllers
                 ViewBag.Passphrase = "*******";
             }
 
-            var request = CryptoKey.CreateRequestWithPassPhrase(newKeyModel.Passphrase);
+            var request = CryptoKey.CreateWithPassphraseProtectedKeys(newKeyModel.Passphrase);
 
             request.LockDate = newKeyModel.LockDate;
             if (newKeyModel.ReleaseDate != null) request.ReleaseDate = (DateTime)newKeyModel.ReleaseDate;

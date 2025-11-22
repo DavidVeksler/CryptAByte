@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace CryptAByte.Domain.KeyManager
 {
@@ -9,18 +7,16 @@ namespace CryptAByte.Domain.KeyManager
     {
         void AddRequest(CryptoKey request);
         CryptoKey GetRequest(string token);
-        void AttachMessageToRequest(string token, string plainTextMessage);
-        void AttachFileToRequest(string keyToken, byte[] fileData, string fileName);
+
+        Task AttachMessageToRequestAsync(string token, string plainTextMessage);
+        Task AttachEncryptedMessageToRequestAsync(string token, string encryptedMessage, string encryptionKey);
+        Task AttachFileToRequestAsync(string keyToken, byte[] fileData, string fileName);
 
         List<Message> GetDecryptedMessagesWithPrivateKey(string token, string privateKey);
         List<Message> GetDecryptedMessagesWithPassphrase(string token, string passphrase);
-
         List<Message> GetEncryptedMessages(string token, string privateKeyHash);
 
         Message GetMessageByMessageId(int messageId);
         void DeleteKeyWithPassphrase(string token, string passphrase);
-        void NotifyOnMessageReceived(string token);
-        
-        void AttachEncryptedMessageToRequest(string token, string encryptedmessage, string encryptionkey);
     }
 }
