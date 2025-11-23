@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Security.Cryptography;
 using CryptAByte.CryptoLibrary.EncryptionLibraries;
-using CryptAByte.Domain.Functional;
+using CryptAByte.CryptoLibrary.Functional;
 
 namespace CryptAByte.CryptoLibrary.CryptoProviders
 {
@@ -75,12 +75,9 @@ namespace CryptAByte.CryptoLibrary.CryptoProviders
             // Encrypt message with AES
             var encryptedMessage = _symmetricProvider.EncryptWithKey(message, encryptionKeyForAES);
 
-            // Parse encrypted data to extract IV
-            var encryptedDataResult = EncryptedData.FromCombinedString(encryptedMessage);
-            var initializationVector = encryptedDataResult.Match(
-                onSuccess: data => data.InitializationVector,
-                onFailure: _ => string.Empty
-            );
+            // Extract IV - it's derived from the encryption key and salt
+            // The IV is deterministically generated from the key, so we compute it the same way AESEncryption does
+            var initializationVector = ComputeInitializationVector(encryptionKeyForAES);
 
             // Encrypt AES key with RSA public key
             var encryptedPassword = EncryptWithKey(encryptionKeyForAES, publicKey);
@@ -182,18 +179,47 @@ namespace CryptAByte.CryptoLibrary.CryptoProviders
         {
             var result = DecryptMessageWithKey(privateKey, messageData, encryptedDecryptionKey, hashOfMessage);
 
-            return result.Match(
+            string tempEncryptionKey = string.Empty;
+            var returnValue = result.Match(
                 onSuccess: data =>
                 {
-                    encryptionKey = data.DecryptionKey;
+                    tempEncryptionKey = data.DecryptionKey;
                     return data.PlainText;
                 },
                 onFailure: error =>
                 {
-                    encryptionKey = string.Empty;
+                    tempEncryptionKey = string.Empty;
                     throw new CryptographicException(error);
                 }
             );
+            encryptionKey = tempEncryptionKey;
+            return returnValue;
+        }
+
+        /// <summary>
+        /// Computes the initialization vector (IV) from an encryption key.
+        /// This matches the IV derivation used in AESEncryption.
+        /// </summary>
+        private string ComputeInitializationVector(string encryptionKey)
+        {
+            // Use the same salt as SymmetricCryptoProvider
+            var salt = System.Text.Encoding.Unicode.GetBytes(_symmetricProvider.GetType()
+                .GetField("_encryptionSalt", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                ?.GetValue(_symmetricProvider) as string ?? "CryptAByte.EncryptionSalt.b64");
+
+            // Derive bytes using the same method as AESEncryption
+            using (var deriveBytes = new System.Security.Cryptography.Rfc2898DeriveBytes(
+                encryptionKey, salt))
+            {
+                using (var algorithm = new System.Security.Cryptography.AesManaged())
+                {
+                    // Skip the key bytes to get to the IV
+                    deriveBytes.GetBytes(algorithm.KeySize >> 3);
+                    // Get the IV bytes
+                    var ivBytes = deriveBytes.GetBytes(algorithm.BlockSize >> 3);
+                    return Convert.ToBase64String(ivBytes);
+                }
+            }
         }
 
         #endregion

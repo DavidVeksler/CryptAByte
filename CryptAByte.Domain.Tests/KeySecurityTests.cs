@@ -21,7 +21,7 @@ namespace CryptAByte.Domain.Tests
         [TestMethod]
         public void CannotGetKeyBeforeReleaseDate()
         {
-            var request = CryptoKey.CreateRequest(DateTime.Now.AddDays(1));
+            var request = CryptoKey.CreateWithGeneratedKeys(DateTime.Now.AddDays(1));
             Assert.IsNull(request.GetPrivateKey);
         }
 

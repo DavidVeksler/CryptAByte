@@ -75,7 +75,11 @@ namespace CryptAByte.Domain.KeyManager
             if (string.IsNullOrWhiteSpace(token))
                 throw new ArgumentException("Token/Identifier is required to attach message!", nameof(token));
 
-            string compressedFile = FileUtilities.CompressAndEncodeFile(fileName, fileData);
+            var compressedFileResult = FileUtilities.CompressAndEncodeFile(fileName, fileData);
+            var compressedFile = compressedFileResult.Match(
+                onSuccess: value => value,
+                onFailure: error => throw new InvalidOperationException($"Failed to compress file: {error}")
+            );
             AttachDataToKey(token, compressedFile, true);
             await NotifyKeyOwnerOfNewMessageAsync(token).ConfigureAwait(false);
         }
@@ -91,9 +95,11 @@ namespace CryptAByte.Domain.KeyManager
 
             if (string.IsNullOrWhiteSpace(encryptionKey))
             {
-                var crypto = new AsymmetricCryptoProvider();
+                var symmetricProvider = new SymmetricCryptoProvider();
+                var randomGenerator = new CryptoLibrary.Functional.CryptoRandomGenerator();
+                var crypto = new AsymmetricCryptoProvider(symmetricProvider, randomGenerator);
                 encryptedMessage = crypto.EncryptMessageWithKey(compressedMessage, request.PublicKey, out encryptedPassword,
-                                                                       out hash);    
+                                                                       out hash);
             }
             else
             {
@@ -195,7 +201,9 @@ namespace CryptAByte.Domain.KeyManager
             if (!request.IsReleased)
                 throw new InvalidOperationException("Request is not released yet.");
 
-            var crypto = new AsymmetricCryptoProvider();
+            var symmetricProvider = new SymmetricCryptoProvider();
+            var randomGenerator = new CryptoLibrary.Functional.CryptoRandomGenerator();
+            var crypto = new AsymmetricCryptoProvider(symmetricProvider, randomGenerator);
 
             var plaintextMessages = new List<Message>();
 

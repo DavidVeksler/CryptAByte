@@ -19,7 +19,7 @@ namespace CryptAByte.Domain.Migrations
         }
     }
 
-    internal sealed class Configuration : DbMigrationsConfiguration<CryptAByte.Domain.KeyManager.CryptAByteContext>
+    internal sealed class Configuration : DbMigrationsConfiguration<CryptAByte.Domain.DataContext.CryptAByteContext>
     {
         public Configuration()
         {
@@ -29,7 +29,7 @@ namespace CryptAByte.Domain.Migrations
         }
 
 
-        protected override void Seed(CryptAByte.Domain.KeyManager.CryptAByteContext context)
+        protected override void Seed(CryptAByte.Domain.DataContext.CryptAByteContext context)
         {
             //  This method will be called after migrating to the latest version.
 

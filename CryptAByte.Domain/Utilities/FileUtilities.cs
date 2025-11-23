@@ -162,19 +162,25 @@ namespace CryptAByte.Domain.Utilities
         public static byte[] DecodeAndDecompressFile(string base64ZippedData, out string fileName)
         {
             var result = DecodeAndDecompressFile(base64ZippedData);
+            string tempFileName = string.Empty;
+            byte[] fileData = null;
 
-            return result.Match(
+            result.Match(
                 onSuccess: file =>
                 {
-                    fileName = file.FileName;
+                    tempFileName = file.FileName;
+                    fileData = file.Data;
                     return file.Data;
                 },
                 onFailure: error =>
                 {
-                    fileName = string.Empty;
+                    tempFileName = string.Empty;
                     throw new InvalidOperationException(error);
                 }
             );
+
+            fileName = tempFileName;
+            return fileData;
         }
 
         /// <summary>

@@ -3,10 +3,15 @@ using System.Data.Entity;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using CryptAByte.CryptoLibrary.CryptoProviders;
+using CryptAByte.CryptoLibrary.Functional;
+using CryptAByte.Domain.DataContext;
 using CryptAByte.Domain.KeyManager;
+using CryptAByte.Domain.Services;
 using Ionic.Zip;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 
 namespace CryptAByte.Domain.Tests
 {
@@ -75,27 +80,31 @@ namespace CryptAByte.Domain.Tests
         [TestMethod]
         public void Can_Create_AndRetrieveKeys()
         {
-            var repository = new RequestRepository();
-            var request = CryptoKey.CreateRequest(DateTime.Now);
+            var context = new CryptAByteContext();
+            var mockEmailService = new Mock<IEmailService>();
+            var repository = new RequestRepository(context, mockEmailService.Object);
+            var request = CryptoKey.CreateWithGeneratedKeys(DateTime.Now);
             repository.AddRequest(request);
             var retrieved = repository.GetRequest(request.KeyToken);
             Assert.AreEqual(request.KeyToken, retrieved.KeyToken);
         }
 
         [TestMethod]
-        public void Can_CreateRequestWithPublicKey_AndRetrieveKeys()
+        public async Task Can_CreateRequestWithPublicKey_AndRetrieveKeys()
         {
-            var repository = new RequestRepository();
+            var context = new CryptAByteContext();
+            var mockEmailService = new Mock<IEmailService>();
+            var repository = new RequestRepository(context, mockEmailService.Object);
 
             var keys = AsymmetricCryptoProvider.GenerateKeys();
 
-            keys.PrivateKey = new SymmetricCryptoProvider().EncryptWithKey(keys.PrivateKey, password);
+            var encryptedPrivateKey = new SymmetricCryptoProvider().EncryptWithKey(keys.PrivateKey, password);
 
-            var request = CryptoKey.CreateRequestWithPublicKey(keys.PublicKey, keys.PrivateKey,true);
-            
+            var request = CryptoKey.CreateWithProvidedKeys(keys.PublicKey, encryptedPrivateKey, true);
+
             repository.AddRequest(request);
 
-            repository.AttachMessageToRequest(request.KeyToken,message);
+            await repository.AttachMessageToRequestAsync(request.KeyToken, message);
 
             var retrieved = repository.GetRequest(request.KeyToken);
 
@@ -111,8 +120,10 @@ namespace CryptAByte.Domain.Tests
         [TestMethod]
         public void Can_Create_AndRetrieveKeysWithNotifications()
         {
-            var repository = new RequestRepository();
-            var request = CryptoKey.CreateRequest(DateTime.Now);
+            var context = new CryptAByteContext();
+            var mockEmailService = new Mock<IEmailService>();
+            var repository = new RequestRepository(context, mockEmailService.Object);
+            var request = CryptoKey.CreateWithGeneratedKeys(DateTime.Now);
 
             const string email = "heroic@gmail.com";
             request.Notifications.Add(new Notification {Email = email});
@@ -128,8 +139,10 @@ namespace CryptAByte.Domain.Tests
         public void Can_Create_AndRetrieveKeysWithMessages()
         {
             // Arrange:
-            var repository = new RequestRepository();
-            var request = CryptoKey.CreateRequest(DateTime.Now);
+            var context = new CryptAByteContext();
+            var mockEmailService = new Mock<IEmailService>();
+            var repository = new RequestRepository(context, mockEmailService.Object);
+            var request = CryptoKey.CreateWithGeneratedKeys(DateTime.Now);
             const string message = "secret message";
             request.Messages.Add(new Message {MessageData = message});
 
@@ -143,22 +156,24 @@ namespace CryptAByte.Domain.Tests
         }
 
         [TestMethod]
-        public void Can_Create_AndRetrieveEncryptedMessages()
+        public async Task Can_Create_AndRetrieveEncryptedMessages()
         {
             // Arrange:
-            var repository = new RequestRepository();
-            var request = CryptoKey.CreateRequest(DateTime.Now);
+            var context = new CryptAByteContext();
+            var mockEmailService = new Mock<IEmailService>();
+            var repository = new RequestRepository(context, mockEmailService.Object);
+            var request = CryptoKey.CreateWithGeneratedKeys(DateTime.Now);
 
             const string message = "secret message";
             //request.Messages.Add(new Message { MessageData = message });
 
             // Act:
             repository.AddRequest(request);
-            repository.AttachMessageToRequest(request.KeyToken,message);
-            
-            repository = new RequestRepository();
+            await repository.AttachMessageToRequestAsync(request.KeyToken, message);
 
-            var messages = repository.GetEncryptedMessages(request.KeyToken, request.PrivateKeyHash);
+            var repository2 = new RequestRepository(context, mockEmailService.Object);
+
+            var messages = repository2.GetEncryptedMessages(request.KeyToken, request.PrivateKeyHash);
 
             // Assert:
             Assert.IsTrue(messages.Count() == 1);
@@ -168,16 +183,22 @@ namespace CryptAByte.Domain.Tests
         public void Create_Message_Encrypt_Decrypt_Verify()
         {
             // Arrange:
-            var repository = new RequestRepository();
-            var request = CryptoKey.CreateRequest(DateTime.Now);
+            var context = new CryptAByteContext();
+            var mockEmailService = new Mock<IEmailService>();
+            var repository = new RequestRepository(context, mockEmailService.Object);
+            var request = CryptoKey.CreateWithGeneratedKeys(DateTime.Now);
             var keys = AsymmetricCryptoProvider.GenerateKeys();
-            var crypto = new AsymmetricCryptoProvider();
+            var symmetricProvider = new SymmetricCryptoProvider();
+            var randomGenerator = new CryptoRandomGenerator();
+            var crypto = new AsymmetricCryptoProvider(symmetricProvider, randomGenerator);
             const string message = "secret message";
 
             string encryptedPassword;
             string hash;
+#pragma warning disable CS0618 // Type or member is obsolete
             string encryptedMessage = crypto.EncryptMessageWithKey(message, keys.PublicKey, out encryptedPassword,
                                                                    out hash);
+#pragma warning restore CS0618 // Type or member is obsolete
 
             request.Messages.Add(new Message
                 {MessageData = encryptedMessage, EncryptionKey = encryptedPassword, MessageHash = hash});
@@ -189,9 +210,11 @@ namespace CryptAByte.Domain.Tests
 
             string messageDecryptionKey;
 
+#pragma warning disable CS0618 // Type or member is obsolete
             var decryptedMessage = crypto.DecryptMessageWithKey(keys.PrivateKey, retrievedMessage.MessageData,
                                                                 retrievedMessage.EncryptionKey,
                                                                 retrievedMessage.MessageHash, out messageDecryptionKey);
+#pragma warning restore CS0618 // Type or member is obsolete
 
             // Assert:
             Assert.AreEqual(message, decryptedMessage);
@@ -199,16 +222,18 @@ namespace CryptAByte.Domain.Tests
 
 
         [TestMethod]
-        public void Create_Request_AttachMessage_Decrypt_Verify()
+        public async Task Create_Request_AttachMessage_Decrypt_Verify()
         {
             // Arrange:
-            var repository = new RequestRepository();
-            var request = CryptoKey.CreateRequest(DateTime.Now);
+            var context = new CryptAByteContext();
+            var mockEmailService = new Mock<IEmailService>();
+            var repository = new RequestRepository(context, mockEmailService.Object);
+            var request = CryptoKey.CreateWithGeneratedKeys(DateTime.Now);
             const string message = "secret message";
 
             // Act:
             repository.AddRequest(request);
-            repository.AttachMessageToRequest(request.KeyToken, message);
+            await repository.AttachMessageToRequestAsync(request.KeyToken, message);
 
             var decryptedMessages = repository.GetDecryptedMessagesWithPrivateKey(request.KeyToken,
                                                                                   request.GetPrivateKey);
@@ -219,16 +244,18 @@ namespace CryptAByte.Domain.Tests
         }
 
         [TestMethod]
-        public void Cannot_decrypt_locked_request()
+        public async Task Cannot_decrypt_locked_request()
         {
             // Arrange:
-            var repository = new RequestRepository();
-            var request = CryptoKey.CreateRequest(DateTime.Now.AddDays(1));
+            var context = new CryptAByteContext();
+            var mockEmailService = new Mock<IEmailService>();
+            var repository = new RequestRepository(context, mockEmailService.Object);
+            var request = CryptoKey.CreateWithGeneratedKeys(DateTime.Now.AddDays(1));
             const string message = "secret message";
 
             // Act:
             repository.AddRequest(request);
-            repository.AttachMessageToRequest(request.KeyToken, message);
+            await repository.AttachMessageToRequestAsync(request.KeyToken, message);
 
             try
             {
@@ -242,15 +269,17 @@ namespace CryptAByte.Domain.Tests
         }
 
         [TestMethod]
-        public void Create_Request_With_Passphrase_AttachMessage_Decrypt_Verify()
+        public async Task Create_Request_With_Passphrase_AttachMessage_Decrypt_Verify()
         {
             // Arrange:
-            var repository = new RequestRepository();
-            var request = CryptoKey.CreateRequestWithPassPhrase(password);
+            var context = new CryptAByteContext();
+            var mockEmailService = new Mock<IEmailService>();
+            var repository = new RequestRepository(context, mockEmailService.Object);
+            var request = CryptoKey.CreateWithPassphraseProtectedKeys(password);
 
             // Act:
             repository.AddRequest(request);
-            repository.AttachMessageToRequest(request.KeyToken, message);
+            await repository.AttachMessageToRequestAsync(request.KeyToken, message);
 
             var decryptedMessages = repository.GetDecryptedMessagesWithPassphrase(request.KeyToken, password);
 
@@ -260,16 +289,18 @@ namespace CryptAByte.Domain.Tests
         }
 
         [TestMethod]
-        public void DeleteMessagesAfterReading()
+        public async Task DeleteMessagesAfterReading()
         {
             // Arrange:
-            var repository = new RequestRepository();
-            var request = CryptoKey.CreateRequestWithPassPhrase(password);
+            var context = new CryptAByteContext();
+            var mockEmailService = new Mock<IEmailService>();
+            var repository = new RequestRepository(context, mockEmailService.Object);
+            var request = CryptoKey.CreateWithPassphraseProtectedKeys(password);
             request.DeleteMessagesAfterReading = true;
 
             // Act:
             repository.AddRequest(request);
-            repository.AttachMessageToRequest(request.KeyToken, message);
+            await repository.AttachMessageToRequestAsync(request.KeyToken, message);
 
             var decryptedMessages = repository.GetDecryptedMessagesWithPassphrase(request.KeyToken, password);
 
@@ -281,16 +312,18 @@ namespace CryptAByte.Domain.Tests
         }
 
         [TestMethod]
-        public void DeleteKeyAfterReading()
+        public async Task DeleteKeyAfterReading()
         {
             // Arrange:
-            var repository = new RequestRepository();
-            var request = CryptoKey.CreateRequestWithPassPhrase(password);
+            var context = new CryptAByteContext();
+            var mockEmailService = new Mock<IEmailService>();
+            var repository = new RequestRepository(context, mockEmailService.Object);
+            var request = CryptoKey.CreateWithPassphraseProtectedKeys(password);
             request.DeleteKeyAfterReading = true;
 
             // Act:
             repository.AddRequest(request);
-            repository.AttachMessageToRequest(request.KeyToken, message);
+            await repository.AttachMessageToRequestAsync(request.KeyToken, message);
 
             var decryptedMessages = repository.GetDecryptedMessagesWithPassphrase(request.KeyToken, password);
 
@@ -301,16 +334,18 @@ namespace CryptAByte.Domain.Tests
         }
 
         [TestMethod]
-        public void NotifyOnMessageReceived()
+        public async Task NotifyOnMessageReceived()
         {
             // Arrange:
-            var repository = new RequestRepository();
-            var request = CryptoKey.CreateRequestWithPassPhrase(password);
+            var context = new CryptAByteContext();
+            var mockEmailService = new Mock<IEmailService>();
+            var repository = new RequestRepository(context, mockEmailService.Object);
+            var request = CryptoKey.CreateWithPassphraseProtectedKeys(password);
             request.Notifications.Add(new Notification {Email = "heroic@gmail.com"});
 
             // Act:
             repository.AddRequest(request);
-            repository.AttachMessageToRequest(request.KeyToken, message);
+            await repository.AttachMessageToRequestAsync(request.KeyToken, message);
 
             //Mock<IRequestRepository> mock = new Mock<IRequestRepository>();
 
@@ -330,8 +365,10 @@ namespace CryptAByte.Domain.Tests
         public void DeleteKeyFromRepository()
         {
             // Arrange:
-            var repository = new RequestRepository();
-            var request = CryptoKey.CreateRequestWithPassPhrase(password);
+            var context = new CryptAByteContext();
+            var mockEmailService = new Mock<IEmailService>();
+            var repository = new RequestRepository(context, mockEmailService.Object);
+            var request = CryptoKey.CreateWithPassphraseProtectedKeys(password);
             request.DeleteKeyAfterReading = true;
 
             // Act:
@@ -349,8 +386,10 @@ namespace CryptAByte.Domain.Tests
         public void DeleteKeyWithInvalidpasswordFromRepositoryFails()
         {
             // Arrange:
-            var repository = new RequestRepository();
-            var request = CryptoKey.CreateRequestWithPassPhrase(password);
+            var context = new CryptAByteContext();
+            var mockEmailService = new Mock<IEmailService>();
+            var repository = new RequestRepository(context, mockEmailService.Object);
+            var request = CryptoKey.CreateWithPassphraseProtectedKeys(password);
             request.DeleteKeyAfterReading = true;
 
             // Act:
@@ -370,19 +409,21 @@ namespace CryptAByte.Domain.Tests
 
 
         [TestMethod]
-        public void Create_Request_With_Passphrase_AttachFile_Decrypt_Verify()
+        public async Task Create_Request_With_Passphrase_AttachFile_Decrypt_Verify()
         {
             // Arrange:
 
             string fileName = AssemblyDirectory + @"\Test.PNG";
             byte[] fileBytes = File.ReadAllBytes(fileName);
 
-            var repository = new RequestRepository();
-            var request = CryptoKey.CreateRequestWithPassPhrase(password);
+            var context = new CryptAByteContext();
+            var mockEmailService = new Mock<IEmailService>();
+            var repository = new RequestRepository(context, mockEmailService.Object);
+            var request = CryptoKey.CreateWithPassphraseProtectedKeys(password);
 
             // Act:
             repository.AddRequest(request);
-            repository.AttachFileToRequest(request.KeyToken, fileBytes, fileName);
+            await repository.AttachFileToRequestAsync(request.KeyToken, fileBytes, fileName);
             var decryptedMessages = repository.GetDecryptedMessagesWithPassphrase(request.KeyToken, password);
 
             // Assert:

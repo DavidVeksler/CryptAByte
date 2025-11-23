@@ -6,6 +6,7 @@ using System.Data.Entity.Core.Objects.DataClasses;
 using System.Linq;
 using System.Xml.Serialization;
 using CryptAByte.CryptoLibrary.CryptoProviders;
+using CryptAByte.Domain.DataContext;
 
 namespace CryptAByte.Domain.KeyManager
 {
@@ -82,7 +83,7 @@ namespace CryptAByte.Domain.KeyManager
         #region Derived Properties
 
         [NotMapped]
-        public bool IsReleased { get { return ReleaseDate < DateTime.Now; } }
+        public bool IsReleased { get { return ReleaseDate <= DateTime.UtcNow; } }
 
         [XmlElement("PrivateKey")]
         [NotMapped]

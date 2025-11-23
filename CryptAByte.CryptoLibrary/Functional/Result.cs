@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace CryptAByte.Domain.Functional
+namespace CryptAByte.CryptoLibrary.Functional
 {
     /// <summary>
     /// Represents the result of an operation that can either succeed with a value or fail with an error.
@@ -10,7 +10,7 @@ namespace CryptAByte.Domain.Functional
     /// </summary>
     public abstract class Result<TValue, TError>
     {
-        protected Result() { }
+        private Result() { }
 
         /// <summary>
         /// Applies a transformation to the success value if present, otherwise propagates the error.
@@ -176,29 +176,4 @@ namespace CryptAByte.Domain.Functional
         }
     }
 
-    /// <summary>
-    /// Simplified Result type with string error messages.
-    /// This class cannot be used directly - use the factory methods in SimpleResult instead.
-    /// </summary>
-    public abstract class Result<TValue> : Result<TValue, string>
-    {
-        // Make constructor internal so nested classes can access it
-        internal Result() : base() { }
-    }
-
-    /// <summary>
-    /// Factory methods for creating simple Result instances with string errors.
-    /// </summary>
-    public static class SimpleResult
-    {
-        public static Result<TValue, string> Success<TValue>(TValue value)
-        {
-            return Result.Success<TValue, string>(value);
-        }
-
-        public static Result<TValue, string> Failure<TValue>(string error)
-        {
-            return Result.Failure<TValue, string>(error);
-        }
-    }
 }

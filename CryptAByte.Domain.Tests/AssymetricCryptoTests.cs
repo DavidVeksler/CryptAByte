@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using CryptAByte.CryptoLibrary.CryptoProviders;
+using CryptAByte.CryptoLibrary.Functional;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CryptAByte.Domain.Tests
@@ -22,7 +23,9 @@ namespace CryptAByte.Domain.Tests
         [TestMethod]
         public void Encrypt_Decrypt_ReturnsOriginalValue()
         {
-            var crypto = new AsymmetricCryptoProvider();
+            var symmetricProvider = new SymmetricCryptoProvider();
+            var randomGenerator = new CryptoRandomGenerator();
+            var crypto = new AsymmetricCryptoProvider(symmetricProvider, randomGenerator);
             var key = AsymmetricCryptoProvider.GenerateKeys();
 
             var cryptoText = crypto.EncryptWithKey(secret, key.PublicKey);
@@ -36,17 +39,21 @@ namespace CryptAByte.Domain.Tests
         public void Message_Encrypt_Decrypt_ReturnsOriginalValue()
         {
             // Arrange
-            var crypto = new AsymmetricCryptoProvider();
+            var symmetricProvider = new SymmetricCryptoProvider();
+            var randomGenerator = new CryptoRandomGenerator();
+            var crypto = new AsymmetricCryptoProvider(symmetricProvider, randomGenerator);
             var key = AsymmetricCryptoProvider.GenerateKeys();
             string hash;
             string encryptedPassword;
 
             // Act
+#pragma warning disable CS0618 // Type or member is obsolete
             var encryptedMessage = crypto.EncryptMessageWithKey(secret, key.PublicKey, out encryptedPassword, out hash);
-            
+
             string messageDecryptionKey;
 
             var decryptedSecret = crypto.DecryptMessageWithKey(key.PrivateKey, encryptedMessage, encryptedPassword, hash, out messageDecryptionKey);
+#pragma warning restore CS0618 // Type or member is obsolete
 
             // Assert
             Assert.AreEqual(secret, decryptedSecret);

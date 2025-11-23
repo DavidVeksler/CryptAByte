@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using CryptAByte.CryptoLibrary.Compression;
+using CryptAByte.CryptoLibrary;
 using CryptAByte.Domain.Functional;
 using CryptAByte.Domain.Models;
 
@@ -65,7 +65,7 @@ namespace CryptAByte.Domain.BusinessLogic
                 .Select(msg => DecryptAndDecompress(msg, privateKey, decryptFunction))
                 .ToList();
 
-            return results.Sequence();
+            return results.Sequence().Map(messages => (IReadOnlyList<ImmutableMessage>)messages.ToList().AsReadOnly());
         }
 
         /// <summary>

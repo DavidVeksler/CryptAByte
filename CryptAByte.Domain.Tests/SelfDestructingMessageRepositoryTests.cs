@@ -7,6 +7,7 @@ using CryptAByte.Domain.DataContext;
 using CryptAByte.Domain.KeyManager;
 using CryptAByte.Domain.SelfDestructingMessaging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 
 namespace CryptAByte.Domain.Tests
 {
@@ -25,7 +26,8 @@ namespace CryptAByte.Domain.Tests
         [TestMethod]
         public void Can_Create_And_Read_Message()
         {
-            var repository = new SelfDestructingMessageRepository();
+            var context = new CryptAByteContext();
+            var repository = new SelfDestructingMessageRepository(context);
 
             int messageId = repository.StoreMessage(new SelfDestructingMessage() { Message = secret, SentDate = DateTime.Now }, passphrase);
 
@@ -37,7 +39,8 @@ namespace CryptAByte.Domain.Tests
         [TestMethod]
         public void Can_Create_And_Read_Message_With_Attachment()
         {
-            var repository = new SelfDestructingMessageRepository();
+            var context = new CryptAByteContext();
+            var repository = new SelfDestructingMessageRepository(context);
 
             const string attachmentName = "test.txt";
 
@@ -45,8 +48,8 @@ namespace CryptAByte.Domain.Tests
             {
                 Message = secret,
                 SentDate = DateTime.Now,
-                SelfDestructingMessageAttachment = new SelfDestructingMessageAttachment() { 
-                    //AttachmentName = attachmentName, 
+                SelfDestructingMessageAttachment = new SelfDestructingMessageAttachment() {
+                    //AttachmentName = attachmentName,
                     Attachment = "TEST DATA" }
             }, passphrase,
             attachmentName,
@@ -64,13 +67,14 @@ namespace CryptAByte.Domain.Tests
 
             // todo:
             //Encoding.ASCII.GetBytes("HELLO")
-            
+
         }
 
         [TestMethod]
         public void Cannot_Read_Messages_After_Retrieve()
         {
-            var repository = new SelfDestructingMessageRepository();
+            var context = new CryptAByteContext();
+            var repository = new SelfDestructingMessageRepository(context);
 
             int messageId = repository.StoreMessage(new SelfDestructingMessage() { Message = secret, SentDate = DateTime.Now }, passphrase);
 

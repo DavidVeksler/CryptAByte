@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using CryptAByte.CryptoLibrary;
 using CryptAByte.CryptoLibrary.CryptoProviders;
@@ -33,7 +34,11 @@ namespace CryptAByte.Domain.SelfDestructingMessaging
             // save attachment, if it exists
             if (attachmentData != null && attachmentData.Length > 0)
             {
-                string compressedFile = FileUtilities.CompressAndEncodeFile(attachmentName, attachmentData);
+                var compressedFileResult = FileUtilities.CompressAndEncodeFile(attachmentName, attachmentData);
+                var compressedFile = compressedFileResult.Match(
+                    onSuccess: value => value,
+                    onFailure: error => throw new InvalidOperationException($"Failed to compress file: {error}")
+                );
 
                 attachment = new SelfDestructingMessageAttachment
                 {
